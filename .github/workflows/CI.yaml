@@ -16,12 +16,12 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Récupération du code
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
 
       - name: Install npm
-        uses: actions/setup-node@v6.3.0
+        uses: actions/setup-node@v6.4.0
         with:
-          node-version: 24.14.0
+          node-version: 24.16.0
 
       - name: Install npm dependencies
         run: npm ci --ignore-scripts && npm rebuild sqlite3
@@ -29,20 +29,13 @@ jobs:
       - name: Create env file
         run: |
           cat .env.example > .env
-          sed -i -e "s/__NODE_ENV__/testing/g" ./.env
-          sed -i -e "s/__APP_NAME__/eso-status/g" ./.env
-          sed -i -e "s/__APP_HOST__/localhost/g" ./.env
+          sed -i -e "s/__NODE_ENV__/test/g" ./.env
+          sed -i -e "s/__APP_NAME__/nestjs/g" ./.env
           sed -i -e "s/__APP_PORT__/3000/g" ./.env
           sed -i -e "s/__DB_TYPE__/sqlite/g" ./.env
-          sed -i -e "s/__DB_HOST__//g" ./.env
-          sed -i -e "s/__DB_PORT__//g" ./.env
-          sed -i -e "s#__DB_NAME__#src/database/dev#g" ./.env
-          sed -i -e "s/__DB_USER__//g" ./.env
-          sed -i -e "s/__DB_PASSWORD__//g" ./.env
-          sed -i -e "s/__DB_DEBUG__/$DB_DEBUG/g" ./.env
-          sed -i -e "s/__FORUM_MESSAGE_UPDATE_INTERVAL__/1000/g" ./.env
-          sed -i -e "s/__LIVE_SERVICES_UPDATE_INTERVAL__/1000/g" ./.env
-          sed -i -e "s/__SERVICE_ALERTS_UPDATE_INTERVAL__/1000/g" ./.env
+          sed -i -e "s#__DB_NAME__#src/database/test#g" ./.env
+          sed -i -e "s/__DB_DEBUG__/false/g" ./.env
+          sed -i -e "s/__INTERVAL_MS__/1000/g" ./.env
 
       - name: Build assets
         run: npm run build
@@ -57,6 +50,6 @@ jobs:
         run: npm run test:cov
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # 7.0.0
+        uses: SonarSource/sonarqube-scan-action@713881670b6b3676cda39549040e2d88c70d582e # 8.2.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
