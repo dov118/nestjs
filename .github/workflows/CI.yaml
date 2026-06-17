@@ -28,14 +28,14 @@ jobs:
 
       - name: Create env file
         run: |
-          cat .env.example > .env
-          sed -i -e "s/__NODE_ENV__/test/g" ./.env
-          sed -i -e "s/__APP_NAME__/nestjs/g" ./.env
-          sed -i -e "s/__APP_PORT__/3000/g" ./.env
-          sed -i -e "s/__DB_TYPE__/sqlite/g" ./.env
-          sed -i -e "s#__DB_NAME__#src/database/test#g" ./.env
-          sed -i -e "s/__DB_DEBUG__/false/g" ./.env
-          sed -i -e "s/__INTERVAL_MS__/1000/g" ./.env
+          cat .env.example > .env.test
+          sed -i -e "s/__NODE_ENV__/test/g" ./.env.test
+          sed -i -e "s/__APP_NAME__/nestjs/g" ./.env.test
+          sed -i -e "s/__APP_PORT__/3000/g" ./.env.test
+          sed -i -e "s/__DB_TYPE__/sqlite/g" ./.env.test
+          sed -i -e "s#__DB_NAME__#src/database/test#g" ./.env.test
+          sed -i -e "s/__DB_DEBUG__/false/g" ./.env.test
+          sed -i -e "s/__INTERVAL_MS__/1000/g" ./.env.test
 
       - name: Build assets
         run: npm run build

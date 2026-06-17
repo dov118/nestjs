@@ -94,6 +94,10 @@ the repo and flag the divergence.
   resource layout: `entities/<name>.entity.ts`, `dto/`, `<name>.controller.ts`,
   `<name>.service.ts`, `<name>.module.ts`. Migrations and seeders always stay in
   `src/database/`.
+- Cross-cutting providers that span multiple resources (logging, scheduling,
+  utilities) live in `src/service/<name>/<name>.service.ts`. Register them
+  directly in `AppModule`; do not create a dedicated NestJS module unless a
+  controller is also present.
 
 ## 6. NestJS
 
@@ -173,6 +177,9 @@ Only then re-run the tests to confirm the suite is still green.
 - Set an explicit `timeout` on e2e tests.
 - Coverage via `test:cov` → `lcov.info` → SonarCloud. Exclude `test/**` from
   Sonar analysis.
+- `test/setup-env.ts` loads `.env.${process.env.NODE_ENV ?? 'test'}` via
+  `dotenv` (with `override: true`) before any test runs; register it once in
+  Jest `setupFiles`. Never call `dotenv.config()` inside individual spec files.
 - TypeORM integration tests: put DataSource options in `test/typeorm.config.ts`
   (entities and migrations as direct class references — never a glob — with
   `dropSchema: true`, `synchronize: false`). `test/setup-typeorm.ts` exports
@@ -183,6 +190,16 @@ Only then re-run the tests to confirm the suite is still green.
 - Seeders have no dedicated spec. They are exercised implicitly: `setupDatabase()`
   resets the database before each test via migrations; a broken seeder surfaces as
   a failure in the consumer test.
+- NestJS provider tests: build a minimal `TestingModule` with
+  `Test.createTestingModule`, importing only the modules actually needed (e.g.
+  `ScheduleModule.forRoot()`) and substituting DI providers inline:
+  `{ provide: X, useValue: { method: jest.fn() } }`. Always call
+  `appModule.init()` after `compile()`, and `appModule.close()` in `afterEach`
+  to stop schedulers and release resources.
+- Scheduler/interval tests: call `jest.useFakeTimers()` and
+  `jest.setSystemTime(fixedDate)` in `beforeEach`; advance time with
+  `jest.advanceTimersByTime(intervalMs)` to trigger `@Interval()` handlers
+  without real waiting; reset with `jest.useRealTimers()` in `afterEach`.
 
 ## 9. Code quality gates
 
