@@ -1,0 +1,8 @@
+/dist
+/node_modules
+.DS_Store
+/coverage
+/.sonarlint/connectedMode.json
+/.idea
+.env
+/src/database/dev
