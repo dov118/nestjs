@@ -2,6 +2,9 @@ import { config } from 'dotenv';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions } from 'typeorm-extension';
 
+import { UserSeeder } from '../database/seeds/user.seeder';
+import { User } from '../resource/user/entities/user.entity';
+
 config({ quiet: true });
 
 const customDataSourceOptions: {
@@ -17,9 +20,9 @@ customDataSourceOptions.mysql = {
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   synchronize: false,
-  entities: [],
+  entities: [User],
   migrations: ['dist/database/migrations/*.js'],
-  seeds: [],
+  seeds: [UserSeeder],
   factories: [],
   migrationsRun: false,
   logging: process.env.DB_DEBUG === 'true',
@@ -30,9 +33,9 @@ customDataSourceOptions.sqlite = {
   type: process.env.DB_TYPE as 'sqlite',
   database: process.env.DB_NAME,
   synchronize: false,
-  entities: [],
+  entities: [User],
   migrations: ['dist/database/migrations/*.js'],
-  seeds: [],
+  seeds: [UserSeeder],
   factories: [],
   migrationsRun: false,
   logging: process.env.DB_DEBUG === 'true',

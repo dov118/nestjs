@@ -4,6 +4,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { dataSourceOptions } from './config/typeorm.config';
+import { User } from './resource/user/entities/user.entity';
 import { IntervalService } from './service/interval/interval.service';
 import { WinstonService } from './service/winston/winston.service';
 
@@ -13,7 +14,7 @@ import { WinstonService } from './service/winston/winston.service';
       envFilePath: [`.env.${process.env.NODE_ENV ?? 'development'}`, '.env'],
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot(dataSourceOptions),
+    TypeOrmModule.forRoot({ ...dataSourceOptions, entities: [User] }),
     ScheduleModule.forRoot(),
   ],
   controllers: [],
