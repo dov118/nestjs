@@ -36,6 +36,7 @@
   "dependencies": {
     "@nestjs/cli": "11.0.23",
     "@nestjs/common": "11.1.27",
+    "@nestjs/config": "4.0.4",
     "@nestjs/core": "11.1.27",
     "@nestjs/platform-express": "11.1.27",
     "@nestjs/platform-socket.io": "11.1.27",
@@ -104,7 +105,7 @@
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
     "setupFiles": [
-      "dotenv/config"
+      "<rootDir>/test/setup-env.ts"
     ],
     "moduleDirectories": [
       "node_modules",

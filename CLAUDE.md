@@ -12,6 +12,23 @@ TypeORM (MySQL in prod, SQLite in CI/local), Winston logger, Socket.IO gateway,
 and rolls out on K3s. No business module yet — features land as NestJS modules
 under `src/`.
 
+## Tech stack
+
+| Layer               | Choice                                   |
+| ------------------- | ---------------------------------------- |
+| Language            | TypeScript 5, Node 24                    |
+| Framework           | NestJS 11                                |
+| Database (prod)     | MySQL 8 via TypeORM                      |
+| Database (CI/local) | SQLite via TypeORM                       |
+| Migrations          | TypeORM CLI (`migration:run`)            |
+| Tests               | Jest (unit + e2e), `--runInBand`         |
+| Logging             | Winston + Morgan (HTTP)                  |
+| Events / realtime   | Socket.IO gateway (`@nestjs/websockets`) |
+| Scheduling          | `@nestjs/schedule` (cron decorators)     |
+| Linting / format    | ESLint + Prettier                        |
+| Container           | Docker (multi-stage)                     |
+| Registry / deploy   | Harbor → K3s                             |
+
 ## Commands
 
 ```bash
@@ -36,7 +53,7 @@ src/config/            typeorm.config.ts (mysql|sqlite switch), winston-config.t
 src/service/           Cross-cutting providers (currently WinstonService)
 src/database/          SQLite dev file, migrations/, data/, seeds/ (to come)
 test/                  Jest e2e config + fixtures
-docs/                  Conventions, architecture — read on demand
+docs/                  Conventions — read on demand
 ```
 
 ## How to work here
@@ -63,7 +80,6 @@ The hard rules, in brief. Full detail in `docs/coding-conventions.md`.
 
 Read the file that matches the task. Each is self-contained.
 
-| File | Read it when… |
-|------|---------------|
+| File                         | Read it when…                                                                                                                                 |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `docs/coding-conventions.md` | Writing or reviewing any code — style, typing, naming, architecture, tests, git, persistence, errors, async, security. The default reference. |
-| `docs/architecture.md` | Touching bootstrap, the TypeORM config, the logger wiring, env vars, the Docker entrypoint, or the CI/CD pipeline. The "why" behind the infrastructure. |

@@ -4,5 +4,6 @@
 /coverage
 /.sonarlint/connectedMode.json
 /.idea
-.env
-/src/database/dev
+.env*
+!.env.example
+/src/database/*

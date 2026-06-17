@@ -53,7 +53,6 @@ the repo and flag the divergence.
   spurious `!` assertions on every `@Inject`-style field. Reach for `unknown`
   and narrow at boundaries instead.
 
-
 ## 4. Naming
 
 - Files: `kebab-case` + a semantic suffix that states the role. Use exactly:
@@ -101,12 +100,61 @@ the repo and flag the divergence.
   whose only consumers ship in the same repo, skip the prefix.
 - Use Winston as the global logger; `enableShutdownHooks()` on bootstrap.
 
-## 7. Testing
+## 7. Feature planning
 
-- Develop test-first, Red-Green-Refactor: write the failing test (red),
-  implement the simplest code that makes it pass (green), then refactor with the
-  test as a safety net. The red step stays local — the `pre-commit` hook runs the
-  full suite, so a commit can only ever capture a completed, green cycle.
+Before writing any code (including tests), produce a written plan and get
+explicit approval. The plan must cover:
+
+- **Files** — exhaustive list of every file to create or modify, with its exact
+  path and NestJS role suffix (`.service.ts`, `.module.ts`, etc.).
+- **Classes & interfaces** — `PascalCase` name, role, injected dependencies.
+- **Public methods** — name, parameters with types, return type.
+- **Key variables & constants** — name, type, and where they live (inline,
+  `.const.ts`, `.env`).
+- **Types & interfaces** — any new `type` or `interface` to introduce.
+- **Test scenarios** — one bullet per `it()` that will be written in the Red
+  step; state the observable behaviour being asserted, not the implementation
+  detail.
+- **Environment variables** — any new key added to `.env.example` and
+  `.env.test`.
+
+Do not start the Red step of TDD until the plan is approved. If the plan
+changes mid-cycle, update and re-approve before continuing.
+
+## 8. Testing
+
+### 8.1 TDD — mandatory, no exceptions
+
+We practise strict Test Driven Development. Tests are always written **before**
+the implementation. The sequence is non-negotiable:
+
+1. **Red** — write a test that describes the desired behaviour and run it.
+   It MUST fail. A test that passes before any implementation is a false
+   positive: throw it away and start over.
+2. **Green** — write the _minimum_ production code that makes the test pass.
+   Do not anticipate future requirements; do not over-engineer. One failing
+   test → one passing test.
+3. **Refactor** — clean the code (rename, extract, simplify) while keeping all
+   tests green. Do not change behaviour; only improve the design.
+
+Repeat the cycle for every new behaviour. The `pre-commit` hook runs the full
+suite, so a commit can only ever capture a completed, green cycle. The red step
+stays local.
+
+**Quality gates during Refactor** — at the end of every Refactor step, before
+considering the cycle complete, run both:
+
+```bash
+npm run format   # Prettier — normalises style
+npm run lint     # ESLint — catches type-unsafe or style violations
+```
+
+Both commands must exit with code 0. Fix every error they report; never silence
+a lint error with a disable comment unless it is truly unavoidable (see §2).
+Only then re-run the tests to confirm the suite is still green.
+
+### 8.2 Tools & constraints
+
 - Jest + ts-jest. `--runInBand` always (tests share real resources: SQLite,
   sockets).
 - Naming: `*.spec.ts` for unit, `*.e2e-spec.ts` for e2e, with a separate
@@ -122,7 +170,7 @@ the repo and flag the divergence.
 - Coverage via `test:cov` → `lcov.info` → SonarCloud. Exclude `test/**` from
   Sonar analysis.
 
-## 8. Code quality gates
+## 9. Code quality gates
 
 - Husky `pre-commit`: `npx lint-staged` → `npm run build` → `npm run test`. The
   committed state is always green. Accept the slowness.
@@ -133,7 +181,7 @@ the repo and flag the divergence.
 - Pin actions by version; SHA-pin security-sensitive ones (Sonar).
 - CD on a `release/*` branch PR merge.
 
-## 9. Git & commits
+## 10. Git & commits
 
 - Branch-driven Git Flow: `feature/<topic>`, `bugfix/<topic>`, `hotfix/<topic>`
   branches merge into a `release/<version>` branch. The release branch merges
@@ -147,7 +195,7 @@ the repo and flag the divergence.
   tests separately.
 - Merge via merge commits. Never squash.
 
-## 10. Dependencies
+## 11. Dependencies
 
 - npm. Commit `package-lock.json`.
 - Pin every dependency to an exact version — no `^`, no `~`.
@@ -159,7 +207,7 @@ the repo and flag the divergence.
   the active DB driver) must stay in `dependencies` or TS resolution breaks at
   build time. Accept the NestJS CLI's layout rather than fighting it.
 
-## 11. Error handling & logging
+## 12. Error handling & logging
 
 - Fail loud, fail once. `throw` on genuine anomalies; write no defensive code for
   cases that "shouldn't happen". An exception means a real bug, not a branch.
@@ -171,7 +219,7 @@ the repo and flag the divergence.
   `[Entity]`, `[Event]`, `[Status]`). Trace every DB write and every emitted
   event.
 
-## 12. Async
+## 13. Async
 
 - `async`/`await` only. Never chain `.then().catch()` in application code.
 - `Promise.all` for independent parallel operations (seeders, fan-out).
@@ -179,7 +227,7 @@ the repo and flag the divergence.
   when the data model allows it. Add retry/backoff/timeout only where a real
   failure mode justifies it, not by default.
 
-## 13. Data & persistence (TypeORM)
+## 14. Data & persistence (TypeORM)
 
 - `synchronize: false` on every entity. Schema is owned by migrations only.
 - Every migration has both `up()` and `down()`. Prefix the class name with a
@@ -194,7 +242,7 @@ the repo and flag the divergence.
 - Wrap multi-write operations in an explicit transaction (extends the audited
   repos, which never needed one — see Notes).
 
-## 14. API contracts
+## 15. API contracts
 
 Apply this section ONLY when the API is consumed by a service outside your
 control. For an internal-only service, skip it.
@@ -204,7 +252,7 @@ control. For an internal-only service, skip it.
 - Keep a single source of truth for the contract: a shared `types` package
   consumed by both server and client. Bump it when the contract changes.
 
-## 15. Security & supply chain
+## 16. Security & supply chain
 
 - Secrets only in CI secrets — never in code, never committed.
 - `.env` is gitignored; commit `.env.example` with `__VAR__` placeholders
@@ -212,7 +260,7 @@ control. For an internal-only service, skip it.
 - `npm ci --ignore-scripts`; SHA-pin sensitive actions; run Docker as a non-root
   user.
 
-## 16. Documentation
+## 17. Documentation
 
 - JSDoc as a contract on the PUBLIC API of a published library: every exported
   class, method, and parameter, in English. Set `removeComments: false` so it
@@ -224,7 +272,7 @@ control. For an internal-only service, skip it.
 - README: a polished "shop window" (badges, install, usage, return-value example)
   for a package others consume; minimal for an internal service.
 
-## 17. Language & locale
+## 18. Language & locale
 
 - Code, comments, JSDoc, commit messages, README: English.
 - GitHub Actions workflow step names: English too.
