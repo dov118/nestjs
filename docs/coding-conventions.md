@@ -57,12 +57,20 @@ the repo and flag the divergence.
   factory over a `!` assertion.
 - Read environment variables via the helpers in `src/config/env.ts`, never via
   `process.env.X` directly:
-  - `getEnv(name: string): string` — throws if missing.
-  - `getEnvNumber(name: string): number` — throws if missing or non-numeric.
+  - `getEnv(name: string, defaultValue?: string): string` — returns the env
+    value; falls back to `defaultValue` when the variable is unset and a
+    default is provided; otherwise throws.
+  - `getEnvNumber(name: string, defaultValue?: number): number` — same
+    contract; also throws when the variable is defined but not numeric
+    (the default never masks a defined-but-invalid value).
 
   The consumer gets a properly typed value (not `string | undefined` /
   `NaN`) and a fatal-fast at boot rather than a silent bad value propagating
-  through the app. The only allowed bypass is at decorator evaluation time
+  through the app. A `defaultValue` is only acceptable when the variable has a
+  sensible local/dev fallback (`DB_TYPE='sqlite'`, etc.). Secrets and
+  host-specific keys (`DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_USER`, …) stay
+  defaultless so the fatal-fast contract holds at boot. The only allowed
+  bypass of the helpers themselves is at decorator evaluation time
   (e.g. `@Interval(Number(process.env.INTERVAL_MS ?? '10000'))`), since the
   decorator runs before any module init and cannot throw cleanly — even
   there, prefer a fallback value.
@@ -239,6 +247,12 @@ haven't touched — only a full-codebase run catches those regressions.
   `jest.setSystemTime(fixedDate)` in `beforeEach`; advance time with
   `jest.advanceTimersByTime(intervalMs)` to trigger `@Interval()` handlers
   without real waiting; reset with `jest.useRealTimers()` in `afterEach`.
+- Smoke spec on every root-composed NestJS module. A single `it` that does
+  `Test.createTestingModule({ imports: [AppModule] }).compile()` → `init()`
+  → `close()` without throwing. Use the real runtime (no overridden
+  providers): the spec's job is to surface import-time regressions — failing
+  `getEnv` calls, broken DI, side effects in `config/`. Apply to `AppModule`
+  today; extend to any future composed root module.
 
 ## 9. Code quality gates
 
@@ -309,6 +323,19 @@ haven't touched — only a full-codebase run catches those regressions.
 - `synchronize: false` on every entity. Schema is owned by migrations only.
 - Every migration has both `up()` and `down()`. Prefix the class name with a
   unix-ms timestamp.
+- Migrations are listed as direct class imports in both
+  `src/config/typeorm.config.ts` and `test/typeorm.config.ts` — never a glob
+  like `dist/database/migrations/*.js`. Adding a migration means importing
+  the class and appending it to the array. Gain: compile-time check, single
+  source of truth, symmetric prod/test config. Note that `migration:run`
+  still needs a prior `npm run build` because the CLI is invoked with
+  `-d ./dist/config/typeorm.config.js`; that constraint is independent of
+  the listing format.
+- The module-level `export const dataSource = new DataSource(dataSourceOptions)`
+  in `src/config/typeorm.config.ts` is required by
+  `typeorm migration:run -d ./dist/config/typeorm.config.js`. It is the ONLY
+  intentional import-time side effect tolerated in `src/config/` beyond the
+  dotenv loader.
 - Repository pattern (`find`, `findOne`, `create`+`save`, `update`, `delete`).
   No custom repository abstraction, no `BaseEntity` active-record style.
 - Calibrate `varchar` lengths to the real data; change a length via a migration

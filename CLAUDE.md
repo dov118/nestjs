@@ -74,9 +74,13 @@ The hard rules, in brief. Full detail in `docs/coding-conventions.md`.
   `npm run format && npm run lint && npm run build && npm run test` on the
   **full codebase**, not just the diff. Don't hand back until all four are
   green.
-- Read env vars via `getEnv()` (`src/config/env.ts`), never via
-  `process.env.X` directly. `getEnv` throws on missing keys → fatal-fast at
-  boot instead of silent `undefined` downstream.
+- Read env vars via `getEnv(name, defaultValue?)` / `getEnvNumber(name, defaultValue?)`
+  (`src/config/env.ts`), never via `process.env.X` directly. Defaults OK on
+  local-safe vars; secrets and host keys stay defaultless so missing-key
+  still throws at boot.
+- Every root-composed NestJS module ships a smoke spec that
+  `compile()` + `init()` + `close()` without throwing, with no overridden
+  providers — catches import-time regressions.
 - Zero `any`. Explicit return types everywhere, including inline callbacks.
 - ESLint and Prettier are law: everything is `error`, never `warn`. Never
   disable a rule globally.
