@@ -150,17 +150,21 @@ Repeat the cycle for every new behaviour. The `pre-commit` hook runs the full
 suite, so a commit can only ever capture a completed, green cycle. The red step
 stays local.
 
-**Quality gates during Refactor** — at the end of every Refactor step, before
-considering the cycle complete, run both:
+**Quality gate** — after EVERY code change (creation, edit, deletion of any
+`.ts` file) AND before every commit, run the full gate on the **entire
+codebase**, not just the touched files:
 
 ```bash
-npm run format   # Prettier — normalises style
-npm run lint     # ESLint — catches type-unsafe or style violations
+npm run format   # Prettier — normalises style on every file
+npm run lint     # ESLint global — catches cross-file type/style regressions
+npm run build    # tsc — detects cross-file typing breakage
+npm run test     # Jest — full suite, --runInBand
 ```
 
-Both commands must exit with code 0. Fix every error they report; never silence
-a lint error with a disable comment unless it is truly unavoidable (see §2).
-Only then re-run the tests to confirm the suite is still green.
+All four must exit with code 0. Fix every error they report; never silence a
+lint error with a disable comment unless it is truly unavoidable (see §2). A
+modification in one file can break typing or tests in another file that you
+haven't touched — only a full-codebase run catches those regressions.
 
 ### 8.2 Tools & constraints
 
@@ -204,8 +208,9 @@ Only then re-run the tests to confirm the suite is still green.
 
 ## 9. Code quality gates
 
-- Husky `pre-commit`: `npx lint-staged` → `npm run build` → `npm run test`. The
-  committed state is always green. Accept the slowness.
+- Husky `pre-commit`: `npx lint-staged` → `npm run build` → `npm run lint` →
+  `npm run test`. The committed state is always green on the **full
+  codebase**, not only on the staged diff. Accept the slowness.
 - `lint-staged`: `*.ts` → `eslint --fix` + `prettier --write`;
   `*.{json,md,yml,yaml}` → `prettier --write`.
 - CI (GitHub Actions) on all branches: checkout → setup-node (pinned) →

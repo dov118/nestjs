@@ -7,16 +7,6 @@ validation, correction et commit.
 
 ## 1. Contradictions internes dans les conventions
 
-### 1.b §8.1 (lint pendant Refactor) vs §9 (pre-commit hook)
-
-- §8.1 exige `npm run format` + `npm run lint` à chaque Refactor.
-- §9 décrit le hook : `lint-staged → build → test`. Le `lint` global n'est nulle
-  part dans `.husky/pre-commit`.
-- `lint-staged` ne lint que les fichiers staged — un fichier non staged qui
-  casse le typage n'est jamais détecté localement.
-- **Action** : soit aligner le hook (`lint-staged → build → lint → test`), soit
-  dire que `lint-staged` couvre le besoin et adoucir §8.1.
-
 ### 1.c §13 (`Promise.all` seeders) vs §14 (idempotence par `findOneBy`)
 
 - Lancer plusieurs seeders en parallèle sur la même table avec le pattern
