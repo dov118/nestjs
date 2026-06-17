@@ -47,11 +47,12 @@ the repo and flag the divergence.
 - Enable strict type-checking flags explicitly in `tsconfig.json`, one by one
   (`noImplicitAny`, `strictBindCallApply`, `noFallthroughCasesInSwitch`,
   `forceConsistentCasingInFileNames`), rather than a blanket `strict: true`.
-- Under NestJS, `strictNullChecks` stays in the lint config (`tsconfig.eslint.json`)
-  only, NOT in the build config. NestJS DI initialises injected properties
-  outside the compiler's view; turning the flag on at build time forces
-  spurious `!` assertions on every `@Inject`-style field. Reach for `unknown`
-  and narrow at boundaries instead.
+- `strictNullChecks` is ON in both the build (`tsconfig.json`) and the lint
+  config (`tsconfig.eslint.json`). Nullability bugs are caught at compile time,
+  not deferred to runtime. When NestJS DI initialises a field outside the
+  compiler's view, prefer constructor assignment or an explicit type-safe
+  factory over a `!` assertion. Read env vars via the `getEnv()` helper
+  (`src/config/env.ts`) so the type is `string` end-to-end.
 
 ## 4. Naming
 
@@ -320,11 +321,8 @@ A few rules above intentionally go beyond or correct what the eso-status repos
 show, because they are libraries/single-controller services and a richer
 application needs more:
 
-1. **`strictNullChecks` in the build** — the audited repos enable it for lint
-   only, which lets nullability bugs through compilation. Here it is ON in the
-   build config too.
-2. **Transactions** — eso-status had no multi-write operations, so it never used
+1. **Transactions** — eso-status had no multi-write operations, so it never used
    a transaction. A real CRUD API does: wrap multi-write operations in one.
-3. **Descriptive commit body** — the `Related <branch>` subject is kept (it is
+2. **Descriptive commit body** — the `Related <branch>` subject is kept (it is
    the established convention), but the body must always describe the change, so
    `git log` stays readable without opening the PR.

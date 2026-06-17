@@ -4,11 +4,12 @@ import { config } from 'dotenv';
 import * as morgan from 'morgan';
 
 import { AppModule } from './app.module';
+import { getEnv } from './config/env';
 import { WinstonService } from './service/winston/winston.service';
 
 config({ quiet: true });
 
-export async function bootstrap() {
+export async function bootstrap(): Promise<void> {
   const app: INestApplication = await NestFactory.create(AppModule, {
     logger: new WinstonService(),
   });
@@ -17,8 +18,7 @@ export async function bootstrap() {
 
   app.enableShutdownHooks();
 
-  await app.listen(process.env.APP_PORT);
+  await app.listen(Number(getEnv('APP_PORT')));
 }
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-bootstrap();
+void bootstrap();
