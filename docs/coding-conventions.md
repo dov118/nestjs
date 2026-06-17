@@ -30,7 +30,10 @@ the repo and flag the divergence.
   and `no-unused-vars`: error.
 - Never disable a rule globally. When a disable is truly unavoidable, use an
   inline `// eslint-disable-next-line <exact-rule-name>` on the single line, and
-  only there.
+  only there. Exception: if the same disable would be needed on every file of
+  a structural pattern (e.g. NestJS modules trigger `no-extraneous-class`
+  by design), add a targeted `files`-scoped override in `eslint.config.mjs`
+  instead of repeating the inline disable per file.
 
 ## 3. TypeScript & typing
 

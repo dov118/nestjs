@@ -56,6 +56,12 @@ export default defineConfig([
       },
     },
   },
+  {
+    files: ['**/*.module.ts'],
+    rules: {
+      '@typescript-eslint/no-extraneous-class': 'off',
+    },
+  },
   sonarjs.configs.recommended,
   eslintConfigPrettier,
 ]);

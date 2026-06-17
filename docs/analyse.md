@@ -11,15 +11,6 @@ validation, correction et commit.
 
 ## 2. Code qui viole les conventions
 
-### 2.b `src/app.module.ts`
-
-- `TypeOrmModule.forRoot({ ...dataSourceOptions, entities: [User] })` :
-  `entities: [User]` est **déjà** dans `dataSourceOptions`. Double déclaration,
-  source de bugs futurs.
-- `// eslint-disable-next-line @typescript-eslint/no-extraneous-class` : pattern
-  récurrent pour tous les modules Nest. Devrait être un override ESLint sur
-  `**/*.module.ts` plutôt qu'un disable par fichier.
-
 ### 2.c `src/config/typeorm.config.ts`
 
 - Duplication de 8 champs identiques entre `mysql` et `sqlite`. Une base
