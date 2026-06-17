@@ -4,21 +4,23 @@ import { config } from 'dotenv';
 import * as morgan from 'morgan';
 
 import { AppModule } from './app.module';
-import { getEnv } from './config/env';
+import { getEnvNumber } from './config/env';
 import { WinstonService } from './service/winston/winston.service';
 
 config({ quiet: true });
 
 export async function bootstrap(): Promise<void> {
   const app: INestApplication = await NestFactory.create(AppModule, {
-    logger: new WinstonService(),
+    bufferLogs: true,
   });
+
+  app.useLogger(app.get(WinstonService));
 
   app.use(morgan('combined'));
 
   app.enableShutdownHooks();
 
-  await app.listen(Number(getEnv('APP_PORT')));
+  await app.listen(getEnvNumber('APP_PORT'));
 }
 
 void bootstrap();

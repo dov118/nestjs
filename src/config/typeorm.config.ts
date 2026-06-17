@@ -4,7 +4,7 @@ import { SeederOptions } from 'typeorm-extension';
 
 import { UserSeeder } from '../database/seeds/user.seeder';
 import { User } from '../resource/user/entities/user.entity';
-import { getEnv } from './env';
+import { getEnv, getEnvNumber } from './env';
 
 config({ quiet: true });
 
@@ -12,7 +12,7 @@ function buildMysqlOptions(): DataSourceOptions & SeederOptions {
   return {
     type: 'mysql',
     host: getEnv('DB_HOST'),
-    port: Number(getEnv('DB_PORT')),
+    port: getEnvNumber('DB_PORT'),
     username: getEnv('DB_USER'),
     password: getEnv('DB_PASSWORD'),
     database: getEnv('DB_NAME'),

@@ -52,14 +52,17 @@ the repo and flag the divergence.
   not deferred to runtime. When NestJS DI initialises a field outside the
   compiler's view, prefer constructor assignment or an explicit type-safe
   factory over a `!` assertion.
-- Read environment variables via the `getEnv(name: string): string` helper
-  (`src/config/env.ts`), never via `process.env.X` directly. `getEnv` throws
-  if the variable is missing, so the consumer gets a `string` (not
-  `string | undefined`) and a fatal-fast at boot rather than a silent
-  `undefined` propagating through the app. The only allowed bypass is at
-  decorator evaluation time (e.g. `@Interval(Number(process.env.INTERVAL_MS
-?? '10000'))`), since the decorator runs before any module init and cannot
-  throw cleanly — even there, prefer a fallback value over a hard `getEnv`.
+- Read environment variables via the helpers in `src/config/env.ts`, never via
+  `process.env.X` directly:
+  - `getEnv(name: string): string` — throws if missing.
+  - `getEnvNumber(name: string): number` — throws if missing or non-numeric.
+
+  The consumer gets a properly typed value (not `string | undefined` /
+  `NaN`) and a fatal-fast at boot rather than a silent bad value propagating
+  through the app. The only allowed bypass is at decorator evaluation time
+  (e.g. `@Interval(Number(process.env.INTERVAL_MS ?? '10000'))`), since the
+  decorator runs before any module init and cannot throw cleanly — even
+  there, prefer a fallback value.
 
 ## 4. Naming
 

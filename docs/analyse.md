@@ -11,12 +11,6 @@ validation, correction et commit.
 
 ## 2. Code qui viole les conventions
 
-### 2.a `src/main.ts`
-
-- `new WinstonService()` instancié à la main → viole §6 ligne 100
-  (« 100% constructor injection. No exceptions »). Compromis inévitable pour
-  `NestFactory.create`, mais §6 devrait reconnaître l'exception.
-
 ### 2.b `src/app.module.ts`
 
 - `TypeOrmModule.forRoot({ ...dataSourceOptions, entities: [User] })` :
