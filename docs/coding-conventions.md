@@ -90,6 +90,10 @@ the repo and flag the divergence.
   symmetry's sake.
 - Cloister config by scope (`tsconfig.build.json`, `tsconfig.eslint.json`,
   `.gitignore`, `.npmignore`, `.prettierignore`) rather than one catch-all file.
+- Feature code lives under `src/resource/<name>/` mirroring the NestJS CLI
+  resource layout: `entities/<name>.entity.ts`, `dto/`, `<name>.controller.ts`,
+  `<name>.service.ts`, `<name>.module.ts`. Migrations and seeders always stay in
+  `src/database/`.
 
 ## 6. NestJS
 
@@ -169,6 +173,16 @@ Only then re-run the tests to confirm the suite is still green.
 - Set an explicit `timeout` on e2e tests.
 - Coverage via `test:cov` → `lcov.info` → SonarCloud. Exclude `test/**` from
   Sonar analysis.
+- TypeORM integration tests: put DataSource options in `test/typeorm.config.ts`
+  (entities and migrations as direct class references — never a glob — with
+  `dropSchema: true`, `synchronize: false`). `test/setup-typeorm.ts` exports
+  `setupDatabase()`, which registers `beforeEach`/`afterEach` hooks that drop the
+  schema, reinitialise the DataSource, and run all migrations, giving each `it()` a
+  clean database; and `getDataSource()` to access the live connection. Spec files
+  call `setupDatabase()` at the top of their `describe` block.
+- Seeders have no dedicated spec. They are exercised implicitly: `setupDatabase()`
+  resets the database before each test via migrations; a broken seeder surfaces as
+  a failure in the consumer test.
 
 ## 9. Code quality gates
 
@@ -239,6 +253,9 @@ Only then re-run the tests to confirm the suite is still green.
 - Declare relations explicitly; set `onDelete`/`onUpdate` intentionally.
 - Separate seeder logic (`database/seeds/`) from declarative seed data
   (`database/data/`).
+- Seeders must be idempotent: check for existence before inserting
+  (`findOneBy` → insert only when `null`). Never call `insert` or `upsert`
+  blindly.
 - Wrap multi-write operations in an explicit transaction (extends the audited
   repos, which never needed one — see Notes).
 
