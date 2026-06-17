@@ -69,18 +69,6 @@ validation, correction et commit.
 
 ## 3. Décisions architecturales discutables
 
-### 3.a Triple appel à `dotenv.config()`
-
-`main.ts`, `src/config/typeorm.config.ts`, `src/config/winston-config.ts` font
-chacun leur propre `config({ quiet: true })`. À cela s'ajoute
-`ConfigModule.forRoot()` dans `AppModule` et `test/setup-env.ts`. Cinq points
-d'entrée pour le même besoin. Le résultat actuel marche par chance d'ordre
-d'import.
-
-→ Convention manquante : « env vars chargées en **un seul** point — `main.ts`
-(runtime) et `setup-env.ts` (tests). Aucun autre fichier n'appelle
-`dotenv.config`. »
-
 ### 3.b `service/` vs `resource/`
 
 La frontière est floue. `WinstonService` et `IntervalService` sont dans

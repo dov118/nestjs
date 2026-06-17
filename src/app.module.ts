@@ -9,10 +9,7 @@ import { WinstonService } from './service/winston/winston.service';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: [`.env.${process.env.NODE_ENV ?? 'development'}`, '.env'],
-      isGlobal: true,
-    }),
+    ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true }),
     TypeOrmModule.forRoot(dataSourceOptions),
     ScheduleModule.forRoot(),
   ],

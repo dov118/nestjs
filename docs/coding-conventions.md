@@ -67,6 +67,18 @@ the repo and flag the divergence.
   decorator runs before any module init and cannot throw cleanly — even
   there, prefer a fallback value.
 
+- Env vars are loaded from a **single** point — `src/config/dotenv.ts` — via a
+  side-effect import (`import './config/dotenv';`) at the top of every entry
+  module that may run standalone: `main.ts`, `src/config/typeorm.config.ts`
+  (loaded directly by the TypeORM CLI for `migration:run`), and
+  `src/config/winston-config.ts`. Never call `dotenv.config()` elsewhere in
+  `src/`. The loader reads `.env.${NODE_ENV ?? 'development'}` first, then
+  `.env` as a fallback (no override). For tests, `test/setup-env.ts` is
+  registered as a Jest `setupFile` and reads `.env.${NODE_ENV ?? 'test'}`
+  with `override: true` so that test-specific values win over any
+  ambient env. CI exports `NODE_ENV=test` at the job level so the same loader
+  finds `.env.test` for both `migration:run` and Jest.
+
 ## 4. Naming
 
 - Files: `kebab-case` + a semantic suffix that states the role. Use exactly:

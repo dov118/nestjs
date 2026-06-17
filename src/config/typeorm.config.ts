@@ -1,12 +1,11 @@
-import { config } from 'dotenv';
+import './dotenv';
+
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions } from 'typeorm-extension';
 
 import { UserSeeder } from '../database/seeds/user.seeder';
 import { User } from '../resource/user/entities/user.entity';
 import { getEnv, getEnvNumber } from './env';
-
-config({ quiet: true });
 
 function buildMysqlOptions(): DataSourceOptions & SeederOptions {
   return {

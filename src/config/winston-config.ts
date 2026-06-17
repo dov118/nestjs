@@ -1,8 +1,7 @@
-import { config } from 'dotenv';
+import './dotenv';
+
 import * as winston from 'winston';
 import { Logger } from 'winston';
-
-config({ quiet: true });
 
 const winstonLogger: Logger = winston.createLogger({
   level: 'info',

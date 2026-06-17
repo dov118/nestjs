@@ -14,6 +14,8 @@ jobs:
     name: CI
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      NODE_ENV: test
     steps:
       - name: Récupération du code
         uses: actions/checkout@v6.0.3
