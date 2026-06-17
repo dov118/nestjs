@@ -115,12 +115,21 @@ the repo and flag the divergence.
 
 ## 6. NestJS
 
-- 100% constructor injection, always `private readonly`. No exceptions.
+- 100% constructor injection, always `private readonly`. No exceptions —
+  including the application logger (see bootstrap rule below).
 - Version the API via a global prefix from env (`setGlobalPrefix(APP_PREFIX)`)
   ONLY when the API is consumed by a service outside your control (public API,
   third-party client, separately-deployed front-end). For an internal service
   whose only consumers ship in the same repo, skip the prefix.
 - Use Winston as the global logger; `enableShutdownHooks()` on bootstrap.
+- Bootstrap pattern (`src/main.ts`): create the app with
+  `NestFactory.create(AppModule, { bufferLogs: true })`, then immediately
+  attach the logger via `app.useLogger(app.get(WinstonService))`. Never pass
+  `logger: new WinstonService()` to `NestFactory.create` — instantiating a
+  provider by hand defeats DI, and the buffered-logs mode replays boot logs
+  through the real logger once it is attached. The bootstrap entry point is
+  `void bootstrap()` (not a `// eslint-disable-next-line
+no-floating-promises` workaround).
 
 ## 7. Feature planning
 
