@@ -7,14 +7,6 @@ validation, correction et commit.
 
 ## 1. Contradictions internes dans les conventions
 
-### 1.c §13 (`Promise.all` seeders) vs §14 (idempotence par `findOneBy`)
-
-- Lancer plusieurs seeders en parallèle sur la même table avec le pattern
-  `findOneBy → save` ouvre une race condition.
-- **Action** : soit réserver `Promise.all` à des seeders indépendants (table par
-  table), soit imposer `INSERT ... ON CONFLICT` / `upsert`. À clarifier dans §13
-  ou §14.
-
 ---
 
 ## 2. Code qui viole les conventions

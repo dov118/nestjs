@@ -259,7 +259,13 @@ haven't touched — only a full-codebase run catches those regressions.
 ## 13. Async
 
 - `async`/`await` only. Never chain `.then().catch()` in application code.
-- `Promise.all` for independent parallel operations (seeders, fan-out).
+- `Promise.all` for **independent** parallel operations (fan-out HTTP, IO on
+  disjoint resources). For seeders specifically, « independent » means **the
+  seeders target distinct tables AND share no overlapping unique keys**. As
+  soon as two seeders could both touch the same row (same table, or two
+  tables linked by a FK that one of them needs to resolve), run them
+  sequentially (`for...of await`). The compare-before-write pattern (§14) is
+  not thread-safe under concurrent access to the same row.
 - Prefer designing for idempotency (compare-before-write) over concurrency locks
   when the data model allows it. Add retry/backoff/timeout only where a real
   failure mode justifies it, not by default.
@@ -279,6 +285,14 @@ haven't touched — only a full-codebase run catches those regressions.
 - Seeders must be idempotent: check for existence before inserting
   (`findOneBy` → insert only when `null`). Never call `insert` or `upsert`
   blindly.
+- **Single source of truth per seed row.** Each datum has exactly one
+  responsible seeder. If two seeders would both insert the same row (same
+  unique key), it is a design smell — refactor: extract the shared row into a
+  dedicated « foundational » seeder that runs first, then make the dependent
+  seeders rely on the existing row via `findOneBy` (read-only). This rule
+  makes the `Promise.all` constraint in §13 (« distinct tables, no
+  overlapping unique keys ») easy to honour: by construction, no two seeders
+  ever race on the same row.
 - Wrap multi-write operations in an explicit transaction (extends the audited
   repos, which never needed one — see Notes).
 
