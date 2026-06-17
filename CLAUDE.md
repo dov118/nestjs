@@ -41,8 +41,10 @@ npx jest path/to/file.spec.ts --runInBand    # Single test
 npm run migration:run                        # Run migrations (needs prior build)
 ```
 
-Tests always run `--runInBand` (shared SQLite/sockets). Migrations are loaded
-from `dist/database/migrations/*.js`, so build first. No seed script yet.
+Tests always run `--runInBand` (shared SQLite/sockets). Migrations are
+imported statically in `src/config/typeorm.config.ts`; `migration:run` still
+needs a prior `build` because the CLI loads `./dist/config/typeorm.config.js`.
+No seed script yet.
 
 ## Structure
 

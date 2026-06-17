@@ -22,6 +22,16 @@ describe('getEnv', () => {
       'Missing required environment variable: MISSING_VAR',
     );
   });
+
+  it('should return the default value when the env var is undefined and a default is provided', (): void => {
+    delete process.env.MISSING_VAR;
+    expect(getEnv('MISSING_VAR', 'fallback')).toBe('fallback');
+  });
+
+  it('should return the env value (not the default) when the env var is defined', (): void => {
+    process.env.SOME_VAR = 'actual';
+    expect(getEnv('SOME_VAR', 'fallback')).toBe('actual');
+  });
 });
 
 describe('getEnvNumber', () => {
@@ -50,6 +60,23 @@ describe('getEnvNumber', () => {
   it('should throw when the env var is not a valid number', (): void => {
     process.env.BAD_NUMBER = 'not-a-number';
     expect((): number => getEnvNumber('BAD_NUMBER')).toThrow(
+      'Environment variable BAD_NUMBER is not a valid number: not-a-number',
+    );
+  });
+
+  it('should return the default value when the env var is undefined and a default is provided', (): void => {
+    delete process.env.MISSING_NUMBER;
+    expect(getEnvNumber('MISSING_NUMBER', 42)).toBe(42);
+  });
+
+  it('should return the parsed env value (not the default) when the env var is defined and numeric', (): void => {
+    process.env.SOME_NUMBER = '3000';
+    expect(getEnvNumber('SOME_NUMBER', 42)).toBe(3000);
+  });
+
+  it('should throw when the env var is defined but non-numeric, even if a default is provided', (): void => {
+    process.env.BAD_NUMBER = 'not-a-number';
+    expect((): number => getEnvNumber('BAD_NUMBER', 42)).toThrow(
       'Environment variable BAD_NUMBER is not a valid number: not-a-number',
     );
   });

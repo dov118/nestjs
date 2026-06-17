@@ -3,51 +3,41 @@ import './dotenv';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions } from 'typeorm-extension';
 
+import { CreateUserTable1781710175911 } from '../database/migrations/1781710175911CreateUserTable';
 import { UserSeeder } from '../database/seeds/user.seeder';
 import { User } from '../resource/user/entities/user.entity';
 import { getEnv, getEnvNumber } from './env';
 
-function buildMysqlOptions(): DataSourceOptions & SeederOptions {
-  return {
-    type: 'mysql',
-    host: getEnv('DB_HOST'),
-    port: getEnvNumber('DB_PORT'),
-    username: getEnv('DB_USER'),
-    password: getEnv('DB_PASSWORD'),
-    database: getEnv('DB_NAME'),
-    synchronize: false,
-    entities: [User],
-    migrations: ['dist/database/migrations/*.js'],
-    seeds: [UserSeeder],
-    factories: [],
-    migrationsRun: false,
-    logging: getEnv('DB_DEBUG') === 'true',
-    dropSchema: false,
-  };
-}
-
-function buildSqliteOptions(): DataSourceOptions & SeederOptions {
-  return {
-    type: 'sqlite',
-    database: getEnv('DB_NAME'),
-    synchronize: false,
-    entities: [User],
-    migrations: ['dist/database/migrations/*.js'],
-    seeds: [UserSeeder],
-    factories: [],
-    migrationsRun: false,
-    logging: getEnv('DB_DEBUG') === 'true',
-    dropSchema: false,
-  };
-}
-
 function buildDataSourceOptions(): DataSourceOptions & SeederOptions {
-  const dbType = getEnv('DB_TYPE');
+  const common = {
+    synchronize: false,
+    entities: [User],
+    migrations: [CreateUserTable1781710175911],
+    seeds: [UserSeeder],
+    factories: [],
+    migrationsRun: false,
+    logging: getEnv('DB_DEBUG', 'false') === 'true',
+    dropSchema: false,
+  };
+
+  const dbType = getEnv('DB_TYPE', 'sqlite');
   switch (dbType) {
     case 'mysql':
-      return buildMysqlOptions();
+      return {
+        type: 'mysql',
+        host: getEnv('DB_HOST'),
+        port: getEnvNumber('DB_PORT'),
+        username: getEnv('DB_USER'),
+        password: getEnv('DB_PASSWORD'),
+        database: getEnv('DB_NAME', 'src/database/development'),
+        ...common,
+      };
     case 'sqlite':
-      return buildSqliteOptions();
+      return {
+        type: 'sqlite',
+        database: getEnv('DB_NAME', 'src/database/development'),
+        ...common,
+      };
     default:
       throw new Error(`Unsupported DB_TYPE: ${dbType}`);
   }

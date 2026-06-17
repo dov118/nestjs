@@ -11,19 +11,6 @@ validation, correction et commit.
 
 ## 2. Code qui viole les conventions
 
-### 2.c `src/config/typeorm.config.ts`
-
-- Duplication de 8 champs identiques entre `mysql` et `sqlite`. Une base
-  partagée + override des 4 champs spécifiques rendrait la maintenance plus
-  sûre.
-- `getEnv('DB_TYPE') === 'mysql' ? mysqlOptions : sqliteOptions` : si
-  `DB_TYPE` ne vaut ni `mysql` ni `sqlite`, on tombe silencieusement sur sqlite.
-  Valider explicitement au démarrage.
-- `migrations: ['dist/database/migrations/*.js']` : choix opposé dans
-  `test/typeorm.config.ts` (import direct). Cohérence à imposer dans §14.
-- `export const dataSource: DataSource = new DataSource(dataSourceOptions)` :
-  effet de bord à l'import, à confirmer qu'il sert vraiment au CLI TypeORM.
-
 ### 2.d `src/config/winston-config.ts`
 
 - Nommage incohérent : `winston-config.ts` vs `typeorm.config.ts` (trait
