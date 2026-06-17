@@ -6,4 +6,5 @@
 /.idea
 .env*
 !.env.example
-/src/database/*
+/src/database/development
+/src/database/test
