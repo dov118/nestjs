@@ -80,21 +80,6 @@ Aucune mention de `class-validator`/`class-transformer` ni de `ValidationPipe`
 global. Dès qu'un controller arrive, la question reviendra → §7 (plan) et §6
 (Nest) devraient préciser le pattern par défaut.
 
-### 3.g Aucun smoke test sur `AppModule`
-
-Le bug `getEnv('DB_HOST')` qui jette à l'import de `typeorm.config.ts` n'a pas
-été détecté par la suite : les tests d'entité instancient leur propre
-DataSource via `test/typeorm.config.ts` et ne touchent jamais à
-`src/config/typeorm.config.ts` ni à `AppModule`. Conséquence : tout problème
-d'init au démarrage de l'app (config, DI, modules) ne sort qu'au
-`npm run start:dev`.
-
-→ Ajouter un `test/app.module.spec.ts` minimal qui fait
-`Test.createTestingModule({ imports: [AppModule] }).compile()` puis
-`appModule.init()` et `appModule.close()`. Un seul `it` qui vérifie que
-l'AppModule s'initialise sans jeter suffit à attraper toutes les régressions
-d'import-time.
-
 ### 3.f `npm ci --ignore-scripts` + `npm rebuild sqlite3` dans CI
 
 Contourne immédiatement la sécurité que `--ignore-scripts` apporte. Pas faux en
