@@ -51,8 +51,15 @@ the repo and flag the divergence.
   config (`tsconfig.eslint.json`). Nullability bugs are caught at compile time,
   not deferred to runtime. When NestJS DI initialises a field outside the
   compiler's view, prefer constructor assignment or an explicit type-safe
-  factory over a `!` assertion. Read env vars via the `getEnv()` helper
-  (`src/config/env.ts`) so the type is `string` end-to-end.
+  factory over a `!` assertion.
+- Read environment variables via the `getEnv(name: string): string` helper
+  (`src/config/env.ts`), never via `process.env.X` directly. `getEnv` throws
+  if the variable is missing, so the consumer gets a `string` (not
+  `string | undefined`) and a fatal-fast at boot rather than a silent
+  `undefined` propagating through the app. The only allowed bypass is at
+  decorator evaluation time (e.g. `@Interval(Number(process.env.INTERVAL_MS
+?? '10000'))`), since the decorator runs before any module init and cannot
+  throw cleanly — even there, prefer a fallback value over a hard `getEnv`.
 
 ## 4. Naming
 

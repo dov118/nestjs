@@ -68,6 +68,13 @@ The hard rules, in brief. Full detail in `docs/coding-conventions.md`.
 
 - Develop test-first: Red-Green-Refactor. A commit only ever captures a
   completed, green cycle (the `pre-commit` hook runs the full suite).
+- Quality gate after every code touch AND before every commit:
+  `npm run format && npm run lint && npm run build && npm run test` on the
+  **full codebase**, not just the diff. Don't hand back until all four are
+  green.
+- Read env vars via `getEnv()` (`src/config/env.ts`), never via
+  `process.env.X` directly. `getEnv` throws on missing keys → fatal-fast at
+  boot instead of silent `undefined` downstream.
 - Zero `any`. Explicit return types everywhere, including inline callbacks.
 - ESLint and Prettier are law: everything is `error`, never `warn`. Never
   disable a rule globally.
