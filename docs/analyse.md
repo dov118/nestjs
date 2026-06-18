@@ -11,17 +11,21 @@ validation, correction et commit.
 
 ## 3. Décisions architecturales discutables
 
-### 3.e Pas de DTO + validation
+### 3.e Pas de DTO + validation — STANDBY (pas encore de controller)
 
 Aucune mention de `class-validator`/`class-transformer` ni de `ValidationPipe`
 global. Dès qu'un controller arrive, la question reviendra → §7 (plan) et §6
 (Nest) devraient préciser le pattern par défaut.
 
-### 3.f `npm ci --ignore-scripts` + `npm rebuild sqlite3` dans CI
+**À NE PAS OUBLIER** quand le premier controller arrivera : livrer un **template
+de controller de référence** avec validation, à savoir :
 
-Contourne immédiatement la sécurité que `--ignore-scripts` apporte. Pas faux en
-soi (sqlite3 a besoin d'être rebuilt), mais à mentionner dans §16
-(« exception assumée pour les drivers natifs »).
+- un DTO `create` et un DTO `update` (ex. `update` = `PartialType(create)`),
+  validés par `class-validator` (+ `class-transformer`) ;
+- un `ValidationPipe` global (`whitelist: true`, `forbidNonWhitelisted: true`,
+  `transform: true`) ;
+- graver le pattern par défaut dans `coding-conventions.md` (§6 + §7) et retirer
+  ce point.
 
 ---
 

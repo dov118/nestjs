@@ -38,6 +38,8 @@ jobs:
           sed -i -e "s#__DB_NAME__#src/database/test#g" ./.env.test
           sed -i -e "s/__DB_DEBUG__/false/g" ./.env.test
           sed -i -e "s/__INTERVAL_MS__/1000/g" ./.env.test
+          sed -i -e "s/__LOG_LEVEL__/info/g" ./.env.test
+          sed -i -e "s/__[A-Z_]*__//g" ./.env.test
 
       - name: Build assets
         run: npm run build

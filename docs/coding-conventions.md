@@ -465,9 +465,18 @@ control. For an internal-only service, skip it.
 
 - Secrets only in CI secrets — never in code, never committed.
 - `.env` is gitignored; commit `.env.example` with `__VAR__` placeholders
-  resolved at runtime/CI.
-- `npm ci --ignore-scripts`; SHA-pin sensitive actions; run Docker as a non-root
-  user.
+  resolved at runtime/CI. The CI step that materialises `.env.<env>` from
+  `.env.example` MUST resolve **every** placeholder — set the ones that carry
+  behaviour to a valid value (e.g. `__LOG_LEVEL__` → `info`) and blank the rest
+  with a catch-all (`sed 's/__[A-Z_]*__//g'`). An unresolved `__VAR__` leaks as
+  a literal value (an invalid log level silences the logger, etc.).
+- `npm ci --ignore-scripts` everywhere, to neutralise install-time supply-chain
+  attacks. **Single assumed exception: native DB drivers.** Rebuild only the
+  one native binding the environment actually uses, explicitly and by name —
+  e.g. CI tests on SQLite run `npm ci --ignore-scripts && npm rebuild sqlite3`,
+  while the MySQL prod build (`mysql2`, pure JS) rebuilds nothing. Never drop
+  `--ignore-scripts` wholesale to fix a native module.
+- SHA-pin sensitive actions; run Docker as a non-root user.
 
 ## 17. Documentation
 
