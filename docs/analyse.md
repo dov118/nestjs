@@ -11,13 +11,6 @@ validation, correction et commit.
 
 ## 2. Code qui viole les conventions
 
-### 2.f `src/database/migrations/1781710175911CreateUserTable.ts`
-
-- `created_at`/`updated_at` ont `default: 'CURRENT_TIMESTAMP'` mais **pas** de
-  `ON UPDATE CURRENT_TIMESTAMP` côté SQL. TypeORM gère via `@UpdateDateColumn`,
-  mais un `UPDATE` SQL direct ne touchera pas `updated_at`. Divergence
-  ORM↔SQL non documentée.
-
 ### 2.g Tests
 
 - `test/service/interval/interval.service.spec.ts` : les callbacks

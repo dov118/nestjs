@@ -41,6 +41,7 @@ export class CreateUserTable1781710175911 implements MigrationInterface {
             name: 'updated_at',
             type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
+            onUpdate: 'CURRENT_TIMESTAMP',
           },
         ],
       }),
