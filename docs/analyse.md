@@ -9,16 +9,6 @@ validation, correction et commit.
 
 ---
 
-## 2. Code qui viole les conventions
-
-### 2.g Tests
-
-- `user.entity.spec.ts` : « should reject » teste seulement `toThrow()` sans
-  vérifier le type/message → l'erreur peut venir d'ailleurs sans qu'on le
-  sache.
-
----
-
 ## 3. Décisions architecturales discutables
 
 ### 3.b `service/` vs `resource/`

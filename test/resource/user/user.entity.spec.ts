@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 
 import { User } from '../../../src/resource/user/entities/user.entity';
 import { getDataSource, setupDatabase } from '../../setup-typeorm';
@@ -33,14 +33,22 @@ describe('UserEntity', () => {
         email: 'alice@example.com',
       }),
     );
-    await expect(
-      repository.save(
+    let caught: unknown;
+    try {
+      await repository.save(
         repository.create({
           firstName: 'Bob',
           lastName: 'Jones',
           email: 'alice@example.com',
         }),
-      ),
-    ).rejects.toThrow();
+      );
+    } catch (error: unknown) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(QueryFailedError);
+    expect((caught as QueryFailedError).message).toMatch(
+      /UNIQUE constraint failed: user\.email/,
+    );
   });
 });
