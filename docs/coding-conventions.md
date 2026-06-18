@@ -11,15 +11,23 @@ the repo and flag the divergence.
 
 - Minimal, intentional changes. Touch only what the task requires; do not
   refactor adjacent working code "while you're there".
-- When a working pattern legitimately cannot satisfy a rule (e.g. an env value
-  read inside a decorator evaluated before the DI container exists), KEEP the
-  pattern and document the exception in these conventions — do not rewrite the
-  code to force compliance.
+- Prefer the solution that satisfies a rule cleanly, with no exception — if we
+  can do better without one, we do. A documented exception is a LAST RESORT,
+  used only when the only rule-compliant alternative is genuinely worse (extra
+  structure / indirection / over-engineering) or blocked by a hard
+  language/runtime constraint (e.g. an env value read inside a decorator
+  evaluated before the DI container exists). In that case, KEEP the working
+  pattern and document the exception rather than forcing a worse rewrite.
 - Never delete or replace functional code without an explicit request. Working
   code has value; do not treat a working feature as a disposable "demo".
-- A documented exception beats a clever workaround. Prefer adding a rule
-  exception over introducing extra structure (registries, wrappers, indirection)
-  just to keep a rule technically satisfied.
+- The exception is only justified to avoid adding structure (registries,
+  wrappers, indirection) purely to satisfy a rule on paper. Never invoke "just
+  document the exception" to dodge a genuinely better, simpler design that would
+  remove the need for the exception entirely.
+- Any deliberate deviation from a convention MUST carry an inline comment at the
+  exact site, stating which rule is bent and WHY (broader exceptions also get a
+  note in these conventions). No silent exceptions — if you write the exception,
+  you write the comment in the same change.
 - These minimalism rules govern _executing_ a defined task. When the user
   explicitly asks you to _propose_ or _design_ something (a folder structure, an
   approach), do the opposite of timid: propose the most coherent, navigable
@@ -286,6 +294,11 @@ haven't touched — only a full-codebase run catches those regressions.
 - Favor high-level, scenario/fixture-driven tests through the public entry point
   over isolated unit tests. Capture real snapshots + expected output, drive them
   with `it.each`.
+- A literal value reused both to drive a test (env var, input) and to assert on
+  the result must be a single named constant, declared once at the top of the
+  `describe`, never repeated as a bare literal in both places. E.g. hold the app
+  name and pod name in `const APP_NAME` / `const POD_NAME`, set `process.env`
+  from them, and assert with the same constants (`` `[${APP_NAME}@${POD_NAME}]` ``).
 - Mock at the external SDK boundary with `jest.spyOn` (`axios.get`, a
   connector's static method) — do NOT stub the whole module. When feasible, run
   the real thing (a real Socket.IO server, a real SQLite) rather than mocking it.
@@ -470,6 +483,14 @@ control. For an internal-only service, skip it.
   behaviour to a valid value (e.g. `__LOG_LEVEL__` → `info`) and blank the rest
   with a catch-all (`sed 's/__[A-Z_]*__//g'`). An unresolved `__VAR__` leaks as
   a literal value (an invalid log level silences the logger, etc.).
+- **`.env.example` is the single canonical env contract.** Every other place
+  that declares the runtime env — the CI-generated `.env.<env>`, the deployment
+  manifest's `env:` block (e.g. K8s) — must mirror exactly that variable set:
+  no leftover variables the app no longer reads, none missing. Adding or
+  removing an env var means updating `.env.example` AND every consumer in the
+  same change. The only values that legitimately live in the manifest but not in
+  `.env.example` are runtime-injected ones with no local meaning (e.g. K8s
+  downward-API pod identity), kept as a clearly separate group.
 - `npm ci --ignore-scripts` everywhere, to neutralise install-time supply-chain
   attacks. **Single assumed exception: native DB drivers.** Rebuild only the
   one native binding the environment actually uses, explicitly and by name —
