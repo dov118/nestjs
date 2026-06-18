@@ -8,25 +8,6 @@ Légende de priorité : 🔴 bug / risque prod · 🟠 violation de convention
 
 ---
 
-## 1. Bugs réels / risques en production
-
-### 1.a 🔴 `.husky/pre-commit` : syntaxe dépréciée (cassera en Husky v10)
-
-Husky avertit à chaque commit :
-
-```
-husky - DEPRECATED
-Please remove the following two lines from .husky/pre-commit:
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-They WILL FAIL in v10.0.0
-```
-
-Non bloquant aujourd'hui, mais le hook cassera au passage à Husky v10.
-→ Retirer ces deux lignes de `.husky/pre-commit`.
-
----
-
 ## 2. Violations de conventions (code vs docs)
 
 ### 2.a 🟠 §11 « pin exact, no `^` » — un caret traîne
