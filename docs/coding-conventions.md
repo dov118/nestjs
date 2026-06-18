@@ -119,8 +119,10 @@ the repo and flag the divergence.
 - Files: `kebab-case` + a semantic suffix that states the role. Use exactly:
   `.service.ts`, `.controller.ts`, `.module.ts`, `.entity.ts`, `.seeder.ts`,
   `.config.ts`, `.data.ts`, `.const.ts`, `.type.ts`, `.interface.ts`,
-  `.pattern.ts`, `.formatter.ts`, `.identifier.ts`, `.match.ts`, `.spec.ts`,
-  `.e2e-spec.ts`. Migrations: `<unixTimestampMs><PascalCaseName>.ts`.
+  `.pattern.ts`, `.formatter.ts`, `.identifier.ts`, `.match.ts`,
+  `.factory.ts`, `.dto.ts`, `.guard.ts`, `.pipe.ts`, `.interceptor.ts`,
+  `.filter.ts`, `.middleware.ts`, `.gateway.ts`, `.spec.ts`, `.e2e-spec.ts`.
+  Migrations: `<unixTimestampMs><PascalCaseName>.ts`.
 - Classes: `PascalCase` + technical suffix (`ArchiveService`, `DateFormatter`,
   `CreateArchiveTable1721839547958`).
 - Interfaces: `PascalCase`, NO `I` prefix.
@@ -393,9 +395,10 @@ haven't touched — only a full-codebase run catches those regressions.
   hierarchy and no `Result`/`Either` unless a concrete need appears.
 - Libraries stay silent — never impose a logger on consumers.
 - Services log verbosely and structurally with fixed category tags:
-  `[<Domain>] [<id>] [<Category>] action: detail` (categories like `[Change]`,
-  `[Entity]`, `[Event]`, `[Status]`). Trace every DB write and every emitted
-  event.
+  `[<Domain>] [<id>] [<Category>] action: detail`. The category tags
+  (`[Change]`, `[Entity]`, `[Event]`, `[Status]`) are illustrative, inherited
+  from eso-status — adapt the set to each project. Trace every DB write and
+  every emitted event.
 
 ## 13. Async
 
