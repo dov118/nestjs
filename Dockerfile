@@ -6,9 +6,7 @@ RUN apk add --no-cache libcap tzdata \
 
 ENV TZ=Europe/Paris
 
-WORKDIR /eso-status
-
-EXPOSE 3000
+WORKDIR /app
 
 COPY ./dist/ ./dist/
 COPY ./node_modules/ ./node_modules/

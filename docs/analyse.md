@@ -10,13 +10,7 @@ Légende de priorité : 🔴 bug / risque prod · 🟠 violation de convention
 
 ## 1. Bugs réels / risques en production
 
-### 1.a 🔴 `Dockerfile` : `WORKDIR /eso-status`
-
-Résidu copié du repo eso-status d'origine. Incohérent sur un template
-« NestJS ». De plus `EXPOSE 3000` est figé alors que `APP_PORT` est configurable
-via l'env. → Renommer le WORKDIR (générique) et aligner / documenter le port.
-
-### 1.b 🔴 `.husky/pre-commit` : syntaxe dépréciée (cassera en Husky v10)
+### 1.a 🔴 `.husky/pre-commit` : syntaxe dépréciée (cassera en Husky v10)
 
 Husky avertit à chaque commit :
 
