@@ -8,20 +8,6 @@ Légende de priorité : 🔴 bug / risque prod · 🟠 violation de convention
 
 ---
 
-## 2. Violations de conventions (code vs docs)
-
-### 2.a 🟠 §2 — ordre ESLint réel ≠ ordre documenté
-
-§2 décrit : `js` → tseslint(strict+stylistic+recommendedTypeChecked) → sonarjs
-→ unused-imports → jest → prettier. Le fichier réel met sonarjs en
-avant-dernier (après unused-imports et jest), ajoute
-`...tseslint.configs.recommended` (non documenté) et des règles
-`no-useless-constructor`/`no-empty-function` (non documentées).
-`no-explicit-any: error` y est redondant (déjà fourni par `strictTypeChecked`).
-→ Aligner soit le doc, soit `eslint.config.mjs`.
-
----
-
 ## 3. Décisions architecturales discutables / incohérences
 
 ### 3.a 🟡 `@nestjs/config` importé mais jamais utilisé

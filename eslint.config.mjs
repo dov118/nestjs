@@ -24,10 +24,10 @@ export default defineConfig([
       },
     },
   },
-  ...tseslint.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
-  ...tseslint.configs.recommendedTypeCheckedOnly,
   ...tseslint.configs.stylisticTypeChecked,
+  ...tseslint.configs.recommendedTypeCheckedOnly,
+  sonarjs.configs.recommended,
   {
     plugins: {
       'unused-imports': unusedImports,
@@ -35,9 +35,6 @@ export default defineConfig([
     rules: {
       'unused-imports/no-unused-imports': 'error',
       'unused-imports/no-unused-vars': 'error',
-      '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/no-useless-constructor': 'error',
-      '@typescript-eslint/no-empty-function': 'error',
     },
   },
   {
@@ -62,6 +59,5 @@ export default defineConfig([
       '@typescript-eslint/no-extraneous-class': 'off',
     },
   },
-  sonarjs.configs.recommended,
   eslintConfigPrettier,
 ]);
