@@ -25,6 +25,12 @@ avant-dernier (après unused-imports et jest), ajoute
 `no-explicit-any: error` y est redondant (déjà fourni par `strictTypeChecked`).
 → Aligner soit le doc, soit `eslint.config.mjs`.
 
+### 2.c 🟠 §3 « lire l'env via `getEnv`, jamais `process.env.X` » — `logTime()`
+
+`log-time.service.ts:10` : `Number(process.env.INTERVAL_MS ?? '10000')` lit
+`process.env` en direct, l'inverse de §3 (`getEnv`/`getEnvNumber` depuis
+`src/config/env.ts`). → `getEnvNumber('INTERVAL_MS', 10000)`.
+
 ---
 
 ## 3. Décisions architecturales discutables / incohérences
