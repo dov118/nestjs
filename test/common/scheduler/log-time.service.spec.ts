@@ -1,13 +1,13 @@
 import { ScheduleModule } from '@nestjs/schedule';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { IntervalService } from '../../../src/common/scheduler/interval.service';
+import { LogTimeService } from '../../../src/common/scheduler/log-time.service';
 import { WinstonService } from '../../../src/common/logger/winston.service';
 
 const TEST_INTERVAL_MS = Number(process.env.INTERVAL_MS);
 const FIXED_DATE = new Date('2026-06-17T10:00:00Z');
 
-describe('IntervalService', () => {
+describe('LogTimeService', () => {
   let logMock: jest.Mock;
   let appModule: TestingModule;
 
@@ -19,7 +19,7 @@ describe('IntervalService', () => {
     appModule = await Test.createTestingModule({
       imports: [ScheduleModule.forRoot()],
       providers: [
-        IntervalService,
+        LogTimeService,
         { provide: WinstonService, useValue: { log: logMock } },
       ],
     }).compile();
@@ -32,13 +32,13 @@ describe('IntervalService', () => {
     jest.useRealTimers();
   });
 
-  it('should log local datetime on 3 consecutive ticks at the configured interval', () => {
+  it('should log local datetime on 3 consecutive runs at the configured interval', () => {
     jest.advanceTimersByTime(TEST_INTERVAL_MS);
     expect(logMock).toHaveBeenCalledTimes(1);
     expect(logMock).toHaveBeenNthCalledWith(
       1,
       new Date(FIXED_DATE.getTime() + TEST_INTERVAL_MS).toLocaleString(),
-      IntervalService.name,
+      LogTimeService.name,
     );
 
     jest.advanceTimersByTime(TEST_INTERVAL_MS);
@@ -46,7 +46,7 @@ describe('IntervalService', () => {
     expect(logMock).toHaveBeenNthCalledWith(
       2,
       new Date(FIXED_DATE.getTime() + TEST_INTERVAL_MS * 2).toLocaleString(),
-      IntervalService.name,
+      LogTimeService.name,
     );
 
     jest.advanceTimersByTime(TEST_INTERVAL_MS);
@@ -54,7 +54,7 @@ describe('IntervalService', () => {
     expect(logMock).toHaveBeenNthCalledWith(
       3,
       new Date(FIXED_DATE.getTime() + TEST_INTERVAL_MS * 3).toLocaleString(),
-      IntervalService.name,
+      LogTimeService.name,
     );
   });
 });

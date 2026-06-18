@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { dataSourceOptions } from './config/typeorm.config';
 import { HealthModule } from './modules/health/health.module';
-import { IntervalService } from './common/scheduler/interval.service';
+import { LogTimeService } from './common/scheduler/log-time.service';
 import { WinstonService } from './common/logger/winston.service';
 
 @Module({
@@ -16,7 +16,7 @@ import { WinstonService } from './common/logger/winston.service';
     HealthModule,
   ],
   controllers: [],
-  providers: [WinstonService, IntervalService],
+  providers: [WinstonService, LogTimeService],
   exports: [WinstonService],
 })
 export class AppModule {}

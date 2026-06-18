@@ -10,21 +10,12 @@ Légende de priorité : 🔴 bug / risque prod · 🟠 violation de convention
 
 ## 2. Violations de conventions (code vs docs)
 
-### 2.a 🟠 §4 « nommer par intention, pas par mécanisme » — `IntervalService`
+### 2.a 🟠 §18 « dates ISO 8601 / UTC » — `logTime()` logue en heure locale
 
-§4 dit textuellement : « un provider planifié … est `market-price.service.ts`,
-pas `interval.service.ts` ; le `@Interval` est le comment, pas le quoi ». Or le
-repo livre `common/scheduler/interval.service.ts` / `IntervalService`. Le code
-viole l'exemple même que la convention donne. De plus, ce `tick()` qui logue la
-date est du code de démo mort (§17). → Soit le supprimer, soit le transformer en
-vraie capacité nommée par son intention.
+`log-time.service.ts:12` : `new Date().toLocaleString()` est dépendant de la
+locale et du fuseau, l'opposé d'ISO/UTC.
 
-### 2.b 🟠 §18 « dates ISO 8601 / UTC » — `tick()` logue en heure locale
-
-`interval.service.ts:12` : `new Date().toLocaleString()` est dépendant de la
-locale et du fuseau, l'opposé d'ISO/UTC. (Disparaît si 2.a retire le service.)
-
-### 2.c 🟠 §2 — ordre ESLint réel ≠ ordre documenté
+### 2.b 🟠 §2 — ordre ESLint réel ≠ ordre documenté
 
 §2 décrit : `js` → tseslint(strict+stylistic+recommendedTypeChecked) → sonarjs
 → unused-imports → jest → prettier. Le fichier réel met sonarjs en
