@@ -88,6 +88,11 @@ The hard rules, in brief. Full detail in `docs/coding-conventions.md`.
   from logic.
 - English everywhere (code, comments, commits, README). Commit subject
   `Related <branch>`, body = one line describing the change.
+- Whenever a philosophy or working-style decision emerges (or changes), record
+  it as a rule or adjustment in `docs/coding-conventions.md`. That file is the
+  single, self-contained synthesis of the user's coding philosophy and style,
+  meant to be lifted as-is to bootstrap future projects — keep it minimal,
+  portable, and project-agnostic.
 
 ## Documentation index
 
