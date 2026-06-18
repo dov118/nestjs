@@ -32,12 +32,12 @@ describe('LogTimeService', () => {
     jest.useRealTimers();
   });
 
-  it('should log local datetime on 3 consecutive runs at the configured interval', () => {
+  it('should log UTC ISO datetime on 3 consecutive runs at the configured interval', () => {
     jest.advanceTimersByTime(TEST_INTERVAL_MS);
     expect(logMock).toHaveBeenCalledTimes(1);
     expect(logMock).toHaveBeenNthCalledWith(
       1,
-      new Date(FIXED_DATE.getTime() + TEST_INTERVAL_MS).toLocaleString(),
+      new Date(FIXED_DATE.getTime() + TEST_INTERVAL_MS).toISOString(),
       LogTimeService.name,
     );
 
@@ -45,7 +45,7 @@ describe('LogTimeService', () => {
     expect(logMock).toHaveBeenCalledTimes(2);
     expect(logMock).toHaveBeenNthCalledWith(
       2,
-      new Date(FIXED_DATE.getTime() + TEST_INTERVAL_MS * 2).toLocaleString(),
+      new Date(FIXED_DATE.getTime() + TEST_INTERVAL_MS * 2).toISOString(),
       LogTimeService.name,
     );
 
@@ -53,7 +53,7 @@ describe('LogTimeService', () => {
     expect(logMock).toHaveBeenCalledTimes(3);
     expect(logMock).toHaveBeenNthCalledWith(
       3,
-      new Date(FIXED_DATE.getTime() + TEST_INTERVAL_MS * 3).toLocaleString(),
+      new Date(FIXED_DATE.getTime() + TEST_INTERVAL_MS * 3).toISOString(),
       LogTimeService.name,
     );
   });

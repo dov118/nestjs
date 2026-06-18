@@ -10,12 +10,7 @@ Légende de priorité : 🔴 bug / risque prod · 🟠 violation de convention
 
 ## 2. Violations de conventions (code vs docs)
 
-### 2.a 🟠 §18 « dates ISO 8601 / UTC » — `logTime()` logue en heure locale
-
-`log-time.service.ts:12` : `new Date().toLocaleString()` est dépendant de la
-locale et du fuseau, l'opposé d'ISO/UTC.
-
-### 2.b 🟠 §2 — ordre ESLint réel ≠ ordre documenté
+### 2.a 🟠 §2 — ordre ESLint réel ≠ ordre documenté
 
 §2 décrit : `js` → tseslint(strict+stylistic+recommendedTypeChecked) → sonarjs
 → unused-imports → jest → prettier. Le fichier réel met sonarjs en
@@ -24,12 +19,6 @@ avant-dernier (après unused-imports et jest), ajoute
 `no-useless-constructor`/`no-empty-function` (non documentées).
 `no-explicit-any: error` y est redondant (déjà fourni par `strictTypeChecked`).
 → Aligner soit le doc, soit `eslint.config.mjs`.
-
-### 2.c 🟠 §3 « lire l'env via `getEnv`, jamais `process.env.X` » — `logTime()`
-
-`log-time.service.ts:10` : `Number(process.env.INTERVAL_MS ?? '10000')` lit
-`process.env` en direct, l'inverse de §3 (`getEnv`/`getEnvNumber` depuis
-`src/config/env.ts`). → `getEnvNumber('INTERVAL_MS', 10000)`.
 
 ---
 
