@@ -20,6 +20,11 @@ the repo and flag the divergence.
 - A documented exception beats a clever workaround. Prefer adding a rule
   exception over introducing extra structure (registries, wrappers, indirection)
   just to keep a rule technically satisfied.
+- These minimalism rules govern _executing_ a defined task. When the user
+  explicitly asks you to _propose_ or _design_ something (a folder structure, an
+  approach), do the opposite of timid: propose the most coherent, navigable
+  solution in full — even if adopting it means a larger (then-approved) refactor.
+  Do not default to "keep what exists and just document it".
 
 ---
 
@@ -326,6 +331,9 @@ haven't touched — only a full-codebase run catches those regressions.
   cycle: the feature and its tests together, green. Never commit code and its
   tests separately.
 - Merge via merge commits. Never squash.
+- Never run or propose a commit unless the user explicitly asks. Finish the
+  green Red-Green-Refactor cycle and leave the work staged/ready, but the commit
+  itself is always user-triggered.
 
 ## 11. Dependencies
 
