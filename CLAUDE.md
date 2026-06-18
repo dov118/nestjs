@@ -14,20 +14,21 @@ under `src/`.
 
 ## Tech stack
 
-| Layer               | Choice                                   |
-| ------------------- | ---------------------------------------- |
-| Language            | TypeScript 5, Node 24                    |
-| Framework           | NestJS 11                                |
-| Database (prod)     | MySQL 8 via TypeORM                      |
-| Database (CI/local) | SQLite via TypeORM                       |
-| Migrations          | TypeORM CLI (`migration:run`)            |
-| Tests               | Jest (unit + e2e), `--runInBand`         |
-| Logging             | Winston + Morgan (HTTP)                  |
-| Events / realtime   | Socket.IO gateway (`@nestjs/websockets`) |
-| Scheduling          | `@nestjs/schedule` (cron decorators)     |
-| Linting / format    | ESLint + Prettier                        |
-| Container           | Docker (multi-stage)                     |
-| Registry / deploy   | Harbor → K3s                             |
+| Layer               | Choice                                                 |
+| ------------------- | ------------------------------------------------------ |
+| Language            | TypeScript 5, Node 24                                  |
+| Framework           | NestJS 11                                              |
+| Database (prod)     | MySQL 8 via TypeORM                                    |
+| Database (CI/local) | SQLite via TypeORM                                     |
+| Migrations          | TypeORM CLI (`migration:run`)                          |
+| Tests               | Jest (unit + e2e), `--runInBand`                       |
+| Logging             | Winston + Morgan (HTTP)                                |
+| Events / realtime   | Socket.IO gateway (`@nestjs/websockets`)               |
+| Scheduling          | `@nestjs/schedule` (cron decorators)                   |
+| Health / probes     | `@nestjs/terminus` (`/service/live`, `/service/ready`) |
+| Linting / format    | ESLint + Prettier                                      |
+| Container           | Docker (multi-stage)                                   |
+| Registry / deploy   | Harbor → K3s                                           |
 
 ## Commands
 

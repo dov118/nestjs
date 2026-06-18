@@ -171,6 +171,11 @@ the repo and flag the divergence.
   `modules/<noun>/`, keep the capability in `common/`, and have the capability
   depend on the module (e.g. a `MailService` transport stays in `common/mail/`;
   managed mail templates become `modules/mail-template/`, injected into it).
+- A cross-cutting capability that **exposes a controller but owns no entity**
+  (e.g. health checks) still lives under `modules/<name>/` — a controller needs
+  a module to isolate it. `common/` stays reserved for controller-less
+  providers. So the bucket is decided by "does it expose a REST surface?" first,
+  then domain ownership.
 
 ## 6. NestJS
 
@@ -197,6 +202,17 @@ the repo and flag the divergence.
   through the real logger once it is attached. The bootstrap entry point is
   `void bootstrap()` (not a `// eslint-disable-next-line
 no-floating-promises` workaround).
+- **Health & K8s probes.** Expose health via a controller-only module
+  (`modules/health/`) built on `@nestjs/terminus`. Split the probes: the
+  liveness endpoint is dependency-free (`health.check([])`) so a downed
+  dependency never triggers a restart loop, while the readiness endpoint checks
+  real dependencies (`TypeOrmHealthIndicator.pingCheck`). Wire the K8s
+  `livenessProbe`/`readinessProbe` to the matching paths (e.g. `/service/live`,
+  `/service/ready`) on the container port.
+- **Pod identity in logs.** On K8s, inject pod identity through the downward API
+  (`POD_NAME`/`POD_NAMESPACE`/`POD_UID`/`POD_IP`) and surface it in the logger
+  (human label + structured `defaultMeta`) for log correlation. Read it with
+  local-safe defaults so the app still boots outside the cluster.
 
 ## 7. Feature planning
 

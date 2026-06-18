@@ -9,6 +9,8 @@ async function importLogger(): Promise<Logger> {
 
 describe('winstonLogger', () => {
   const originalEnv = process.env;
+  const APP_NAME = 'demo';
+  const POD_NAME = 'demo-pod-abc123';
 
   beforeEach((): void => {
     jest.resetModules();
@@ -32,7 +34,7 @@ describe('winstonLogger', () => {
   });
 
   it('should render an ISO 8601 timestamp, the app name and the pid', async (): Promise<void> => {
-    process.env.APP_NAME = 'demo';
+    process.env.APP_NAME = APP_NAME;
     const winstonLogger = await importLogger();
 
     let output = '';
@@ -48,8 +50,29 @@ describe('winstonLogger', () => {
       setImmediate(resolve);
     });
 
-    expect(output).toContain('[demo]');
+    expect(output).toContain(`[${APP_NAME}]`);
     expect(output).toContain(String(process.pid));
     expect(output).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/);
+  });
+
+  it('should append the pod name to the label when POD_NAME is defined', async (): Promise<void> => {
+    process.env.APP_NAME = APP_NAME;
+    process.env.POD_NAME = POD_NAME;
+    const winstonLogger = await importLogger();
+
+    let output = '';
+    const stream = new Writable({
+      write(chunk: Buffer, _encoding: string, callback: () => void): void {
+        output += chunk.toString();
+        callback();
+      },
+    });
+    winstonLogger.add(new winston.transports.Stream({ stream }));
+    winstonLogger.info('hello', { context: 'Test' });
+    await new Promise<void>((resolve): void => {
+      setImmediate(resolve);
+    });
+
+    expect(output).toContain(`[${APP_NAME}@${POD_NAME}]`);
   });
 });

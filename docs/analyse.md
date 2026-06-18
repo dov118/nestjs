@@ -11,11 +11,6 @@ validation, correction et commit.
 
 ## 3. Décisions architecturales discutables
 
-### 3.d Pas de health endpoint
-
-Service destiné à K3s (rollout, livenessProbe…) sans `@nestjs/terminus`. Pour
-un template, c'est une lacune majeure.
-
 ### 3.e Pas de DTO + validation
 
 Aucune mention de `class-validator`/`class-transformer` ni de `ValidationPipe`

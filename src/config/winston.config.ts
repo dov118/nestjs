@@ -11,8 +11,16 @@ const ANSI_RESET = '\x1b[39m';
 const appName = getEnv('APP_NAME');
 const pid = String(process.pid);
 
+const podName = getEnv('POD_NAME', '');
+const podNamespace = getEnv('POD_NAMESPACE', '');
+const podUid = getEnv('POD_UID', '');
+const podIp = getEnv('POD_IP', '');
+
+const appLabel = podName === '' ? appName : `${appName}@${podName}`;
+
 const winstonLogger: Logger = winston.createLogger({
   level: getEnv('LOG_LEVEL', 'info'),
+  defaultMeta: { podName, podNamespace, podUid, podIp },
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.printf(
@@ -27,7 +35,7 @@ const winstonLogger: Logger = winston.createLogger({
         timestamp: string;
         context: string;
       }): string =>
-        `${ANSI_GREEN}[${appName}] ${pid}  - ${ANSI_RESET}${timestamp}${ANSI_GREEN}     ${level.toUpperCase()} [${context}] : ${message}${ANSI_RESET}`,
+        `${ANSI_GREEN}[${appLabel}] ${pid}  - ${ANSI_RESET}${timestamp}${ANSI_GREEN}     ${level.toUpperCase()} [${context}] : ${message}${ANSI_RESET}`,
     ),
   ),
   silent: false,
