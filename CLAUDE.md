@@ -51,9 +51,10 @@ No seed script yet.
 ```
 src/main.ts            Bootstrap: NestFactory + WinstonService + Morgan
 src/app.module.ts      Root module: TypeORM + ScheduleModule + Winston
-src/config/            typeorm.config.ts (mysql|sqlite switch), winston-config.ts
-src/service/           Cross-cutting providers (currently WinstonService)
-src/database/          SQLite dev file, migrations/, data/, seeds/ (to come)
+src/config/            typeorm.config.ts (mysql|sqlite switch), winston.config.ts
+src/modules/           Domain features (one folder per noun; e.g. user/)
+src/common/            Cross-cutting capabilities (logger/, scheduler/)
+src/database/          SQLite dev file, migrations/, data/, seeds/
 test/                  Jest e2e config + fixtures
 docs/                  Conventions — read on demand
 ```

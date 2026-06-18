@@ -6,7 +6,7 @@ import * as morgan from 'morgan';
 
 import { AppModule } from './app.module';
 import { getEnvNumber } from './config/env';
-import { WinstonService } from './service/winston/winston.service';
+import { WinstonService } from './common/logger/winston.service';
 
 export async function bootstrap(): Promise<void> {
   const app: INestApplication = await NestFactory.create(AppModule, {

@@ -1,6 +1,6 @@
 import { QueryFailedError, Repository } from 'typeorm';
 
-import { User } from '../../../src/resource/user/entities/user.entity';
+import { User } from '../../../src/modules/user/entities/user.entity';
 import { getDataSource, setupDatabase } from '../../setup-typeorm';
 
 describe('UserEntity', () => {

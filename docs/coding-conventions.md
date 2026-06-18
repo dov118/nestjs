@@ -118,6 +118,10 @@ the repo and flag the divergence.
 - Keep a stable domain prefix on domain types/classes:
   `<Domain><Variant>` (e.g. `EsoStatusMaintenance`, not `MaintenanceEsoStatus`).
 - Long, descriptive, self-documenting names. Never `data1`, `tmp`, `x`.
+- Name by domain intent, not by the technical mechanism. A scheduled provider
+  that fetches stock prices is `market-price.service.ts` /
+  `MarketPriceService`, not `interval.service.ts`; the `@Interval` is how it
+  runs, not what it is.
 - When importing an external type that collides with a local one, alias it:
   `import { Status as EsoStatusStatus } from '@org/types';`.
 - DB: table names singular lowercase; foreign keys `FK_<Table><Reference>`;
@@ -138,14 +142,30 @@ the repo and flag the divergence.
   symmetry's sake.
 - Cloister config by scope (`tsconfig.build.json`, `tsconfig.eslint.json`,
   `.gitignore`, `.npmignore`, `.prettierignore`) rather than one catch-all file.
-- Feature code lives under `src/resource/<name>/` mirroring the NestJS CLI
-  resource layout: `entities/<name>.entity.ts`, `dto/`, `<name>.controller.ts`,
-  `<name>.service.ts`, `<name>.module.ts`. Migrations and seeders always stay in
-  `src/database/`.
-- Cross-cutting providers that span multiple resources (logging, scheduling,
-  utilities) live in `src/service/<name>/<name>.service.ts`. Register them
-  directly in `AppModule`; do not create a dedicated NestJS module unless a
-  controller is also present.
+- Top-level `src/` layout — every file has exactly one home, decided by the
+  "where does X go?" tree:
+  1. Read around/before the DI container → `config/`.
+  2. Owns a domain entity (a noun the app manages, usually with a controller)
+     → `modules/<noun>/`.
+  3. Cross-cutting technical capability reused across modules, with no domain
+     entity and no REST surface → `common/<capability>/`.
+  4. Schema, migrations, seed data → `database/`.
+- `modules/<noun>/` mirrors the NestJS CLI resource layout:
+  `entities/<noun>.entity.ts`, `dto/`, `<noun>.controller.ts`,
+  `<noun>.service.ts`, `<noun>.module.ts`. The module's service holds that
+  noun's business logic. Migrations and seeders always stay in `src/database/`.
+- `common/<capability>/` holds shared providers (e.g. `logger/winston.service.ts`,
+  `scheduler/interval.service.ts`) plus app-wide `decorators/`, `guards/`,
+  `interceptors/`, `filters/`, `pipes/`, `types/`, `constants/`. Register
+  providers directly in `AppModule`; no dedicated NestJS module unless a
+  controller appears. Never use `service/` as a folder name — it collides with
+  the `.service.ts` suffix.
+- The deciding question for `modules/` vs `common/` is **domain ownership, not
+  "does it touch the DB"**. If a provider is both a technical capability _and_
+  needs persistence, split it: extract the persisted noun into its own
+  `modules/<noun>/`, keep the capability in `common/`, and have the capability
+  depend on the module (e.g. a `MailService` transport stays in `common/mail/`;
+  managed mail templates become `modules/mail-template/`, injected into it).
 
 ## 6. NestJS
 

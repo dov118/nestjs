@@ -11,13 +11,6 @@ validation, correction et commit.
 
 ## 3. Décisions architecturales discutables
 
-### 3.b `service/` vs `resource/`
-
-La frontière est floue. `WinstonService` et `IntervalService` sont dans
-`service/` parce qu'ils n'ont pas d'entity ; demain, un `MailService` qui gère
-un template DB est-il une « ressource » ou un « service » ? §5 décrit le
-« quoi » mais pas le « quand ». À préciser, ou à fusionner.
-
 ### 3.c `seeds: [UserSeeder]` configuré mais aucun script `npm run seed:run`
 
 Le mécanisme est branché à moitié. En l'état, les seeders ne tournent que via

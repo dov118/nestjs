@@ -1,8 +1,8 @@
 import { ScheduleModule } from '@nestjs/schedule';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { IntervalService } from '../../../src/service/interval/interval.service';
-import { WinstonService } from '../../../src/service/winston/winston.service';
+import { IntervalService } from '../../../src/common/scheduler/interval.service';
+import { WinstonService } from '../../../src/common/logger/winston.service';
 
 const TEST_INTERVAL_MS = Number(process.env.INTERVAL_MS);
 const FIXED_DATE = new Date('2026-06-17T10:00:00Z');

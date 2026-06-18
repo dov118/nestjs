@@ -5,7 +5,7 @@ import { SeederOptions } from 'typeorm-extension';
 
 import { CreateUserTable1781710175911 } from '../database/migrations/1781710175911CreateUserTable';
 import { UserSeeder } from '../database/seeds/user.seeder';
-import { User } from '../resource/user/entities/user.entity';
+import { User } from '../modules/user/entities/user.entity';
 import { getEnv, getEnvNumber } from './env';
 
 function buildDataSourceOptions(): DataSourceOptions & SeederOptions {

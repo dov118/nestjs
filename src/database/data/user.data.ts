@@ -1,4 +1,4 @@
-import { User } from '../../resource/user/entities/user.entity';
+import { User } from '../../modules/user/entities/user.entity';
 
 export const USER_SEED_DATA: Pick<User, 'firstName' | 'lastName' | 'email'>[] =
   [

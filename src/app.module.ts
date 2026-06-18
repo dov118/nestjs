@@ -4,8 +4,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { dataSourceOptions } from './config/typeorm.config';
-import { IntervalService } from './service/interval/interval.service';
-import { WinstonService } from './service/winston/winston.service';
+import { IntervalService } from './common/scheduler/interval.service';
+import { WinstonService } from './common/logger/winston.service';
 
 @Module({
   imports: [

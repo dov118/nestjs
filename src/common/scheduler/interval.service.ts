@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 
-import { WinstonService } from '../winston/winston.service';
+import { WinstonService } from '../logger/winston.service';
 
 @Injectable()
 export class IntervalService {
