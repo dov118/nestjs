@@ -7,6 +7,20 @@ When the project provides no signal for a decision, follow the rules below. When
 a rule below conflicts with an existing, consistent pattern in the repo, follow
 the repo and flag the divergence.
 
+### Change philosophy
+
+- Minimal, intentional changes. Touch only what the task requires; do not
+  refactor adjacent working code "while you're there".
+- When a working pattern legitimately cannot satisfy a rule (e.g. an env value
+  read inside a decorator evaluated before the DI container exists), KEEP the
+  pattern and document the exception in these conventions — do not rewrite the
+  code to force compliance.
+- Never delete or replace functional code without an explicit request. Working
+  code has value; do not treat a working feature as a disposable "demo".
+- A documented exception beats a clever workaround. Prefer adding a rule
+  exception over introducing extra structure (registries, wrappers, indirection)
+  just to keep a rule technically satisfied.
+
 ---
 
 ## 1. Formatting
