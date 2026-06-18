@@ -5,13 +5,13 @@ import { IntervalService } from '../../../src/service/interval/interval.service'
 import { WinstonService } from '../../../src/service/winston/winston.service';
 
 const TEST_INTERVAL_MS = Number(process.env.INTERVAL_MS);
-const FIXED_DATE = new Date('2026-06-17T10:00:00');
+const FIXED_DATE = new Date('2026-06-17T10:00:00Z');
 
 describe('IntervalService', () => {
   let logMock: jest.Mock;
   let appModule: TestingModule;
 
-  beforeEach(async () => {
+  beforeEach(async (): Promise<void> => {
     jest.useFakeTimers();
     jest.setSystemTime(FIXED_DATE);
     logMock = jest.fn();
@@ -27,7 +27,7 @@ describe('IntervalService', () => {
     await appModule.init();
   });
 
-  afterEach(async () => {
+  afterEach(async (): Promise<void> => {
     await appModule.close();
     jest.useRealTimers();
   });

@@ -269,6 +269,11 @@ haven't touched — only a full-codebase run catches those regressions.
   `jest.setSystemTime(fixedDate)` in `beforeEach`; advance time with
   `jest.advanceTimersByTime(intervalMs)` to trigger `@Interval()` handlers
   without real waiting; reset with `jest.useRealTimers()` in `afterEach`.
+  Anchor any fixed date in UTC (`new Date('…Z')`), per §18.
+  **Exception to "one behaviour per `it()`" (§7):** for `@Interval`/`@Cron`, the
+  behaviour under test is the recurring cadence, so asserting several consecutive
+  ticks (e.g. 3 in a row) inside a single `it()` is allowed and preferred over
+  splitting it.
 - Smoke spec on every root-composed NestJS module. A single `it` that does
   `Test.createTestingModule({ imports: [AppModule] }).compile()` → `init()`
   → `close()` without throwing. Use the real runtime (no overridden

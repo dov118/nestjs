@@ -13,13 +13,6 @@ validation, correction et commit.
 
 ### 2.g Tests
 
-- `test/service/interval/interval.service.spec.ts` : les callbacks
-  `beforeEach`/`afterEach` n'ont pas de type de retour explicite → viole §3.
-- `FIXED_DATE = new Date('2026-06-17T10:00:00')` → date locale, pas UTC → viole
-  §18.
-- Test « 3 ticks consécutifs » assertit 3 comportements dans un seul `it()` →
-  §8 « one bullet per `it()` » lu strictement, ce devrait être trois cas (ou un
-  `it.each`).
 - `user.entity.spec.ts` : « should reject » teste seulement `toThrow()` sans
   vérifier le type/message → l'erreur peut venir d'ailleurs sans qu'on le
   sache.
