@@ -521,6 +521,11 @@ control. For an internal-only service, skip it.
   noise comments on self-evident code.
 - Zero `TODO`/`FIXME`/`HACK`/`XXX`. Remove dead code and deferred decisions —
   don't mark them.
+- Keep durable rules and a transient problem-inventory in **separate files**.
+  This conventions file holds only agreed, durable rules; known issues and
+  deferred work live in a dedicated backlog doc and are deleted from it once
+  fixed and committed. Never record a transient finding as a convention, and
+  never let backlog noise pollute this file.
 - README: a polished "shop window" (badges, install, usage, return-value example)
   for a package others consume; minimal for an internal service.
 
