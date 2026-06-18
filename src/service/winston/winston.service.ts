@@ -1,6 +1,6 @@
 import { Injectable, LoggerService } from '@nestjs/common';
 
-import { winstonLogger } from '../../config/winston-config';
+import { winstonLogger } from '../../config/winston.config';
 
 @Injectable()
 export class WinstonService implements LoggerService {

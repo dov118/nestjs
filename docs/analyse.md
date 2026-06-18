@@ -11,19 +11,6 @@ validation, correction et commit.
 
 ## 2. Code qui viole les conventions
 
-### 2.d `src/config/winston-config.ts`
-
-- Nommage incohérent : `winston-config.ts` vs `typeorm.config.ts` (trait
-  d'union vs point). §4 ne liste pas `.config.ts` comme suffixe sémantique → à
-  ajouter et trancher.
-- Codes ANSI hardcodés (`\x1b[32m`, `\x1b[39m`) inline → illisible. Soit
-  `chalk`/`kleur`, soit des constantes nommées.
-- `format: 'MM/DD/YYYY, hh:mm:ss A'` (format US, 12h) viole §18 ligne 296
-  (« Dates: ISO 8601 / UTC by default »).
-- `level: 'info'` hardcodé → devrait être configurable via `LOG_LEVEL` env.
-- `String(process.env.APP_NAME)`, `String(process.pid)` répétés → le format
-  doit valider le shape au démarrage, pas convertir à chaque log.
-
 ### 2.e `src/service/interval/interval.service.ts`
 
 - `@Interval(Number(process.env.INTERVAL_MS ?? '10000'))` : lit `process.env`

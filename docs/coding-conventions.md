@@ -79,7 +79,7 @@ the repo and flag the divergence.
   side-effect import (`import './config/dotenv';`) at the top of every entry
   module that may run standalone: `main.ts`, `src/config/typeorm.config.ts`
   (loaded directly by the TypeORM CLI for `migration:run`), and
-  `src/config/winston-config.ts`. Never call `dotenv.config()` elsewhere in
+  `src/config/winston.config.ts`. Never call `dotenv.config()` elsewhere in
   `src/`. The loader reads `.env.${NODE_ENV ?? 'development'}` first, then
   `.env` as a fallback (no override). For tests, `test/setup-env.ts` is
   registered as a Jest `setupFile` and reads `.env.${NODE_ENV ?? 'test'}`
@@ -91,9 +91,9 @@ the repo and flag the divergence.
 
 - Files: `kebab-case` + a semantic suffix that states the role. Use exactly:
   `.service.ts`, `.controller.ts`, `.module.ts`, `.entity.ts`, `.seeder.ts`,
-  `.data.ts`, `.const.ts`, `.type.ts`, `.interface.ts`, `.pattern.ts`,
-  `.formatter.ts`, `.identifier.ts`, `.match.ts`, `.spec.ts`, `.e2e-spec.ts`.
-  Migrations: `<unixTimestampMs><PascalCaseName>.ts`.
+  `.config.ts`, `.data.ts`, `.const.ts`, `.type.ts`, `.interface.ts`,
+  `.pattern.ts`, `.formatter.ts`, `.identifier.ts`, `.match.ts`, `.spec.ts`,
+  `.e2e-spec.ts`. Migrations: `<unixTimestampMs><PascalCaseName>.ts`.
 - Classes: `PascalCase` + technical suffix (`ArchiveService`, `DateFormatter`,
   `CreateArchiveTable1721839547958`).
 - Interfaces: `PascalCase`, NO `I` prefix.
