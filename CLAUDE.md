@@ -54,7 +54,7 @@ src/app.module.ts      Root module: TypeORM + ScheduleModule + Winston
 src/config/            typeorm.config.ts (mysql|sqlite switch), winston.config.ts
 src/modules/           Domain features (one folder per noun; e.g. user/)
 src/common/            Cross-cutting capabilities (logger/, scheduler/)
-src/database/          SQLite dev file, migrations/, data/, seeds/
+src/database/          SQLite dev file, migrations/, factories/ (test-data, faker)
 test/                  Jest e2e config + fixtures
 docs/                  Conventions — read on demand
 ```

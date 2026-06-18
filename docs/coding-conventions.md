@@ -259,6 +259,12 @@ haven't touched — only a full-codebase run catches those regressions.
 
 - Jest + ts-jest. `--runInBand` always (tests share real resources: SQLite,
   sockets).
+- ts-jest emits CommonJS, but some dependencies ship pure ESM (e.g. faker v10,
+  loaded lazily by `typeorm-extension` factories). Let ts-jest transform them
+  rather than fighting it: extend the transform to `.js` with `allowJs: true`
+  and whitelist the offending package out of `transformIgnorePatterns`
+  (`"/node_modules/(?!<pkg>/)"`). Prefer this to switching the whole suite to
+  ESM or adding a separate babel toolchain.
 - Naming: `*.spec.ts` for unit, `*.e2e-spec.ts` for e2e, with a separate
   `jest-e2e.json`. Keep tests in `test/`, data fixtures in `test/data/`.
 - Favor high-level, scenario/fixture-driven tests through the public entry point
@@ -281,9 +287,12 @@ haven't touched — only a full-codebase run catches those regressions.
   schema, reinitialise the DataSource, and run all migrations, giving each `it()` a
   clean database; and `getDataSource()` to access the live connection. Spec files
   call `setupDatabase()` at the top of their `describe` block.
-- Seeders have no dedicated spec. They are exercised implicitly: `setupDatabase()`
-  resets the database before each test via migrations; a broken seeder surfaces as
-  a failure in the consumer test.
+- Factories carry a dedicated spec: assert the generated entity has every
+  required field populated with the right shape, that overrides take precedence,
+  and — with `setupDatabase()` — that a fabricated entity persists and receives
+  its generated columns. Structural seeders, when they exist, are exercised
+  implicitly instead: a broken seeder surfaces as a failure in the consumer test
+  that relies on the rows it loads.
 - NestJS provider tests: build a minimal `TestingModule` with
   `Test.createTestingModule`, importing only the modules actually needed (e.g.
   `ScheduleModule.forRoot()`) and substituting DI providers inline:
@@ -396,6 +405,20 @@ haven't touched — only a full-codebase run catches those regressions.
 - Calibrate `varchar` lengths to the real data; change a length via a migration
   rather than over-allocating `text`.
 - Declare relations explicitly; set `onDelete`/`onUpdate` intentionally.
+- **Seeders vs factories — distinct tools, never conflated.**
+  - A _seeder_ loads **structural, durable data the app needs to function**
+    (reference/lookup rows, initial configuration). It is idempotent, runs in
+    every environment including prod (via an explicit `seed:run` script), and
+    lives in `database/seeds/` with its declarative data in `database/data/`.
+    The idempotency and single-source-of-truth rules below govern seeders.
+  - A _factory_ fabricates **disposable, randomised data for dev and tests
+    only** (`typeorm-extension`'s `setSeederFactory`, with faker injected as
+    the callback argument — never import faker directly). It never runs in
+    prod, lives in `database/factories/`, and is registered in the `factories:`
+    array of `typeorm.config.ts`.
+  - Demo or sample rows are NOT structural data: use a factory, not a seeder.
+    Introduce a seeder (and its `seed:run` script) only once genuinely
+    structural data exists — wiring an inert, never-run seeder is misleading.
 - Separate seeder logic (`database/seeds/`) from declarative seed data
   (`database/data/`).
 - Seeders must be idempotent: check for existence before inserting

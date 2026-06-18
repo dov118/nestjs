@@ -11,12 +11,6 @@ validation, correction et commit.
 
 ## 3. Décisions architecturales discutables
 
-### 3.c `seeds: [UserSeeder]` configuré mais aucun script `npm run seed:run`
-
-Le mécanisme est branché à moitié. En l'état, les seeders ne tournent que via
-les tests (qui re-créent un schéma à chaque `it`). Pour la prod : silence. À
-documenter explicitement OU à ajouter le script.
-
 ### 3.d Pas de health endpoint
 
 Service destiné à K3s (rollout, livenessProbe…) sans `@nestjs/terminus`. Pour
