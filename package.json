@@ -47,7 +47,6 @@
     "@nestjs/websockets": "11.1.27",
     "@types/morgan": "1.9.10",
     "dotenv": "17.4.2",
-    "moment": "2.30.1",
     "morgan": "1.11.0",
     "mysql2": "3.22.5",
     "reflect-metadata": "0.2.2",
