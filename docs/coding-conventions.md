@@ -137,6 +137,14 @@ the repo and flag the divergence.
 
 - 100% constructor injection, always `private readonly`. No exceptions —
   including the application logger (see bootstrap rule below).
+- **Env / DI exception.** Some code is evaluated before the Nest DI container
+  (and therefore `ConfigService`) exists: config files loaded by the TypeORM CLI
+  (`typeorm.config.ts`), the Winston logger config (`winston.config.ts`),
+  `main.ts` bootstrap, and scheduler decorators (`@Interval`/`@Cron`) whose
+  arguments are read at class load. In those contexts only, reading the env
+  directly — `process.env` or the `getEnv`/`getEnvNumber` helpers — is the
+  accepted exception to constructor injection. Example:
+  `@Interval(Number(process.env.INTERVAL_MS ?? '10000'))`.
 - Version the API via a global prefix from env (`setGlobalPrefix(APP_PREFIX)`)
   ONLY when the API is consumed by a service outside your control (public API,
   third-party client, separately-deployed front-end). For an internal service

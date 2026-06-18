@@ -11,14 +11,6 @@ validation, correction et commit.
 
 ## 2. Code qui viole les conventions
 
-### 2.e `src/service/interval/interval.service.ts`
-
-- `@Interval(Number(process.env.INTERVAL_MS ?? '10000'))` : lit `process.env`
-  directement (le décorateur ne peut pas attendre l'init de `ConfigService`).
-  Forcé, mais §6 ne reconnaît pas cette exception.
-- Le service de démonstration n'a aucune valeur fonctionnelle pour un template
-  → soit le supprimer, soit documenter qu'il s'agit d'un exemple.
-
 ### 2.f `src/database/migrations/1781710175911CreateUserTable.ts`
 
 - `created_at`/`updated_at` ont `default: 'CURRENT_TIMESTAMP'` mais **pas** de
