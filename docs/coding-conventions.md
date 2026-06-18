@@ -61,6 +61,12 @@ the repo and flag the divergence.
   a structural pattern (e.g. NestJS modules trigger `no-extraneous-class`
   by design), add a targeted `files`-scoped override in `eslint.config.mjs`
   instead of repeating the inline disable per file.
+- Do not redeclare a rule an extended preset already enforces — restating it is
+  dead weight (`strictTypeChecked`/`stylisticTypeChecked` already provide e.g.
+  `no-explicit-any`, `no-useless-constructor`, `no-empty-function`). Likewise do
+  not spread a preset that a stricter one already supersets (`...recommended`
+  under `...strictTypeChecked`). Confirm coverage with
+  `eslint --print-config <file>` before keeping a redundant entry.
 
 ## 3. TypeScript & typing
 
@@ -386,6 +392,14 @@ haven't touched — only a full-codebase run catches those regressions.
   packages (`@nestjs/cli`, `@nestjs/testing`, `@types/*` used at compile time,
   the active DB driver) must stay in `dependencies` or TS resolution breaks at
   build time. Accept the NestJS CLI's layout rather than fighting it.
+- Before removing, pinning, or reclassifying a dependency, prove the change
+  empirically — never assume, and don't trust a "it won't work" belief without a
+  check (it is often wrong). Confirm the installed version already satisfies the
+  new constraint, run the full gate, and trace which install flow actually
+  consumes the package: CI installs all deps and runs tests, while a
+  `--omit=dev` production/CD step that only builds (and excludes `test/`) never
+  needs a test-only package. That is why a test-only runtime package belongs in
+  `devDependencies` and stays safe there.
 
 ## 12. Error handling & logging
 
