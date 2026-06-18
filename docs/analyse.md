@@ -10,30 +10,13 @@ Légende de priorité : 🔴 bug / risque prod · 🟠 violation de convention
 
 ## 1. Bugs réels / risques en production
 
-### 1.a 🔴 `start.sh` ne résout pas tous les placeholders
-
-`start.sh` ne fait des `sed` que sur `NODE_ENV, APP_NAME, APP_PORT, DB_*`. Il
-oublie `__LOG_LEVEL__`, `__INTERVAL_MS__`, `__POD_*__` et n'a pas le catch-all
-`sed 's/__[A-Z_]*__//g'`. Au runtime du conteneur :
-
-- `LOG_LEVEL=__LOG_LEVEL__` → `getEnv('LOG_LEVEL','info')` ne renvoie pas `info`
-  (la var est définie, juste invalide) → Winston reçoit un niveau bidon →
-  logger silencieux. C'est exactement le scénario que §16 décrit comme à éviter.
-- `INTERVAL_MS=__INTERVAL_MS__` → `Number('__INTERVAL_MS__')` = `NaN`, et
-  `?? '10000'` ne rattrape pas `NaN` (seulement `null`/`undefined`) →
-  `@Interval(NaN)`.
-
-`CI.yaml` fait déjà les choses correctement (catch-all `s/__[A-Z_]*__//g`
-présent). → Aligner `start.sh` sur `CI.yaml` : résoudre toutes les vars
-porteuses de sens puis blanchir le reste avec le catch-all.
-
-### 1.b 🔴 `Dockerfile` : `WORKDIR /eso-status`
+### 1.a 🔴 `Dockerfile` : `WORKDIR /eso-status`
 
 Résidu copié du repo eso-status d'origine. Incohérent sur un template
 « NestJS ». De plus `EXPOSE 3000` est figé alors que `APP_PORT` est configurable
 via l'env. → Renommer le WORKDIR (générique) et aligner / documenter le port.
 
-### 1.c 🔴 `.husky/pre-commit` : syntaxe dépréciée (cassera en Husky v10)
+### 1.b 🔴 `.husky/pre-commit` : syntaxe dépréciée (cassera en Husky v10)
 
 Husky avertit à chaque commit :
 
@@ -78,13 +61,7 @@ vraie capacité nommée par son intention.
 `interval.service.ts:12` : `new Date().toLocaleString()` est dépendant de la
 locale et du fuseau, l'opposé d'ISO/UTC. (Disparaît si 2.c retire le service.)
 
-### 2.e 🟠 §16 mirror — `.env.example` et `start.sh` désynchronisés
-
-Conséquence de 1.a : `LOG_LEVEL`/`INTERVAL_MS`/`POD_*` sont dans `.env.example`
-mais absents de `start.sh`. La règle « tout consommateur de l'env reflète
-exactement `.env.example` » est cassée.
-
-### 2.f 🟠 §2 — ordre ESLint réel ≠ ordre documenté
+### 2.e 🟠 §2 — ordre ESLint réel ≠ ordre documenté
 
 §2 décrit : `js` → tseslint(strict+stylistic+recommendedTypeChecked) → sonarjs
 → unused-imports → jest → prettier. Le fichier réel met sonarjs en

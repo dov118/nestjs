@@ -487,13 +487,23 @@ control. For an internal-only service, skip it.
   with a catch-all (`sed 's/__[A-Z_]*__//g'`). An unresolved `__VAR__` leaks as
   a literal value (an invalid log level silences the logger, etc.).
 - **`.env.example` is the single canonical env contract.** Every other place
-  that declares the runtime env — the CI-generated `.env.<env>`, the deployment
-  manifest's `env:` block (e.g. K8s) — must mirror exactly that variable set:
-  no leftover variables the app no longer reads, none missing. Adding or
-  removing an env var means updating `.env.example` AND every consumer in the
-  same change. The only values that legitimately live in the manifest but not in
-  `.env.example` are runtime-injected ones with no local meaning (e.g. K8s
-  downward-API pod identity), kept as a clearly separate group.
+  that declares the runtime env must mirror exactly that variable set: no
+  leftover variables the app no longer reads, none missing. Adding, removing or
+  renaming an env var means updating `.env.example` AND every contact point that
+  exists, in the **same change**:
+  - `.env.example` — the canonical contract itself;
+  - the CI workflow that materialises `.env.<env>` (e.g. `.github/workflows/CI.yaml`);
+  - the container entrypoint that materialises the runtime `.env`
+    (e.g. `start.sh`);
+  - the deployment manifest's `env:` block (e.g. the K8s manifest, here
+    documented in `docs/k3s.md`).
+
+  Skip any contact point that does not exist in the project; the moment it
+  exists, it must reflect the exact `.env.example` variable set. The only values
+  that legitimately live in the manifest but not in `.env.example` are
+  runtime-injected ones with no local meaning (e.g. K8s downward-API pod
+  identity), kept as a clearly separate group.
+
 - `npm ci --ignore-scripts` everywhere, to neutralise install-time supply-chain
   attacks. **Single assumed exception: native DB drivers.** Rebuild only the
   one native binding the environment actually uses, explicitly and by name —

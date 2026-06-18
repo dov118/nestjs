@@ -12,6 +12,13 @@ sed -i -e "s/__DB_NAME__/$DB_NAME/g" ./.env
 sed -i -e "s/__DB_USER__/$DB_USER/g" ./.env
 sed -i -e "s/__DB_PASSWORD__/$DB_PASSWORD/g" ./.env
 sed -i -e "s/__DB_DEBUG__/$DB_DEBUG/g" ./.env
+sed -i -e "s/__LOG_LEVEL__/$LOG_LEVEL/g" ./.env
+sed -i -e "s/__INTERVAL_MS__/$INTERVAL_MS/g" ./.env
+# Blank every remaining placeholder (POD_* are injected at runtime by the K8s
+# downward API, so they stay empty here and process.env wins). Without this
+# catch-all, an unresolved __VAR__ leaks as a literal value (e.g. an invalid
+# LOG_LEVEL silences the logger, INTERVAL_MS becomes NaN).
+sed -i -e "s/__[A-Z_]*__//g" ./.env
 
 ## RUN DATABASE MIGRATION
 npm run migration:run
