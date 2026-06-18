@@ -33,6 +33,21 @@ Résidu copié du repo eso-status d'origine. Incohérent sur un template
 « NestJS ». De plus `EXPOSE 3000` est figé alors que `APP_PORT` est configurable
 via l'env. → Renommer le WORKDIR (générique) et aligner / documenter le port.
 
+### 1.c 🔴 `.husky/pre-commit` : syntaxe dépréciée (cassera en Husky v10)
+
+Husky avertit à chaque commit :
+
+```
+husky - DEPRECATED
+Please remove the following two lines from .husky/pre-commit:
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+They WILL FAIL in v10.0.0
+```
+
+Non bloquant aujourd'hui, mais le hook cassera au passage à Husky v10.
+→ Retirer ces deux lignes de `.husky/pre-commit`.
+
 ---
 
 ## 2. Violations de conventions (code vs docs)
