@@ -1,78 +1,78 @@
+import { ConfigService } from '@nestjs/config';
 import { Writable } from 'stream';
 import * as winston from 'winston';
 import type { Logger } from 'winston';
 
-async function importLogger(): Promise<Logger> {
-  const module = await import('../../src/config/winston.config');
-  return module.winstonLogger;
-}
+import { AppConfig, validateEnv } from '../../src/config/env-schema';
+import { createWinstonLogger } from '../../src/config/winston.config';
 
-describe('winstonLogger', () => {
+describe('createWinstonLogger', () => {
   const originalEnv = process.env;
   const APP_NAME = 'demo';
   const POD_NAME = 'demo-pod-abc123';
 
   beforeEach((): void => {
-    jest.resetModules();
     process.env = { ...originalEnv };
+    process.env.APP_NAME = APP_NAME;
+    process.env.APP_PORT = '3000';
   });
 
   afterAll((): void => {
     process.env = originalEnv;
   });
 
-  it('should use LOG_LEVEL when it is defined', async (): Promise<void> => {
+  function buildConfig(): ConfigService<AppConfig, true> {
+    return new ConfigService<AppConfig, true>(validateEnv(process.env));
+  }
+
+  function capture(logger: Logger): { read: () => string } {
+    let output = '';
+    const stream = new Writable({
+      write(chunk: Buffer, _encoding: string, callback: () => void): void {
+        output += chunk.toString();
+        callback();
+      },
+    });
+    logger.add(new winston.transports.Stream({ stream }));
+    return { read: (): string => output };
+  }
+
+  it('should use LOG_LEVEL when it is defined', (): void => {
     process.env.LOG_LEVEL = 'debug';
-    const winstonLogger = await importLogger();
-    expect(winstonLogger.level).toBe('debug');
+    expect(createWinstonLogger(buildConfig()).level).toBe('debug');
   });
 
-  it('should default to info when LOG_LEVEL is undefined', async (): Promise<void> => {
+  it('should default to info when LOG_LEVEL is undefined', (): void => {
     delete process.env.LOG_LEVEL;
-    const winstonLogger = await importLogger();
-    expect(winstonLogger.level).toBe('info');
+    expect(createWinstonLogger(buildConfig()).level).toBe('info');
   });
 
   it('should render an ISO 8601 timestamp, the app name and the pid', async (): Promise<void> => {
-    process.env.APP_NAME = APP_NAME;
-    const winstonLogger = await importLogger();
+    const logger = createWinstonLogger(buildConfig());
+    const captured = capture(logger);
 
-    let output = '';
-    const stream = new Writable({
-      write(chunk: Buffer, _encoding: string, callback: () => void): void {
-        output += chunk.toString();
-        callback();
-      },
-    });
-    winstonLogger.add(new winston.transports.Stream({ stream }));
-    winstonLogger.info('hello', { context: 'Test' });
+    logger.info('hello', { context: 'Test' });
     await new Promise<void>((resolve): void => {
       setImmediate(resolve);
     });
 
-    expect(output).toContain(`[${APP_NAME}]`);
-    expect(output).toContain(String(process.pid));
-    expect(output).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/);
+    expect(captured.read()).toContain(`[${APP_NAME}]`);
+    expect(captured.read()).toContain(String(process.pid));
+    expect(captured.read()).toMatch(
+      /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/,
+    );
   });
 
   it('should append the pod name to the label when POD_NAME is defined', async (): Promise<void> => {
-    process.env.APP_NAME = APP_NAME;
     process.env.POD_NAME = POD_NAME;
-    const winstonLogger = await importLogger();
+    const logger = createWinstonLogger(buildConfig());
+    const captured = capture(logger);
 
-    let output = '';
-    const stream = new Writable({
-      write(chunk: Buffer, _encoding: string, callback: () => void): void {
-        output += chunk.toString();
-        callback();
-      },
-    });
-    winstonLogger.add(new winston.transports.Stream({ stream }));
-    winstonLogger.info('hello', { context: 'Test' });
+    logger.info('hello', { context: 'Test' });
     await new Promise<void>((resolve): void => {
       setImmediate(resolve);
     });
 
-    expect(output).toContain(`[${APP_NAME}@${POD_NAME}]`);
+    expect(captured.read()).toContain(`[${APP_NAME}@${POD_NAME}]`);
   });
 });

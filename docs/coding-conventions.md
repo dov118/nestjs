@@ -88,37 +88,52 @@ the repo and flag the divergence.
   not deferred to runtime. When NestJS DI initialises a field outside the
   compiler's view, prefer constructor assignment or an explicit type-safe
   factory over a `!` assertion.
-- Read environment variables via the helpers in `src/config/env.ts`, never via
-  `process.env.X` directly:
-  - `getEnv(name: string, defaultValue?: string): string` — returns the env
-    value; falls back to `defaultValue` when the variable is unset and a
-    default is provided; otherwise throws.
-  - `getEnvNumber(name: string, defaultValue?: number): number` — same
-    contract; also throws when the variable is defined but not numeric
-    (the default never masks a defined-but-invalid value).
+- **Reading config — inside Nest, via `ConfigService`; never `process.env.X`.**
+  DI code injects `ConfigService<AppConfig, true>` (`@nestjs/config`) and reads
+  through `getOrThrow('KEY', { infer: true })`, which returns a value typed by
+  `AppConfig` (numbers as numbers, booleans as booleans). The raw helpers in
+  `src/config/env.ts` (`getEnv`/`getEnvNumber`) are **reserved for code that runs
+  outside the DI container** — chiefly decorator arguments evaluated before
+  module init, e.g. `@Interval(getEnvNumber('INTERVAL_MS', 10000))`, which cannot
+  reach `ConfigService`. Nest code must not import `src/config/env.ts`.
 
-  The consumer gets a properly typed value (not `string | undefined` /
-  `NaN`) and a fatal-fast at boot rather than a silent bad value propagating
-  through the app. A `defaultValue` is only acceptable when the variable has a
-  sensible local/dev fallback (`DB_TYPE='sqlite'`, etc.). Secrets and
-  host-specific keys (`DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_USER`, …) stay
-  defaultless so the fatal-fast contract holds at boot. The only allowed
-  bypass of the helpers themselves is at decorator evaluation time
-  (e.g. `@Interval(Number(process.env.INTERVAL_MS ?? '10000'))`), since the
-  decorator runs before any module init and cannot throw cleanly — even
-  there, prefer a fallback value.
+- **Validation + typing happen once, at boot, via Joi.** `AppConfig` and the Joi
+  schema live in `src/config/env-schema.ts`; `validateEnv(raw): AppConfig`
+  validates **and coerces** the whole environment, throwing on a missing or
+  malformed key (fatal-fast). It is wired as `ConfigModule.forRoot({ validate:
+validateEnv })`, so `ConfigService` only ever serves validated, correctly typed
+  values. Locally-safe keys get a Joi `.default()` (`DB_TYPE` → `sqlite`,
+  `LOG_LEVEL` → `info`, …); secrets/host keys stay defaultless via `.required()`
+  (or `.when('DB_TYPE', { is: 'mysql', then: required })`) so a missing key still
+  throws at boot.
 
-- Env vars are loaded from a **single** point — `src/config/dotenv.ts` — via a
-  side-effect import (`import './config/dotenv';`) at the top of every entry
-  module that may run standalone: `main.ts`, `src/config/typeorm.config.ts`
-  (loaded directly by the TypeORM CLI for `migration:run`), and
-  `src/config/winston.config.ts`. Never call `dotenv.config()` elsewhere in
-  `src/`. The loader reads `.env.${NODE_ENV ?? 'development'}` first, then
-  `.env` as a fallback (no override). For tests, `test/setup-env.ts` is
-  registered as a Jest `setupFile` and reads `.env.${NODE_ENV ?? 'test'}`
-  with `override: true` so that test-specific values win over any
-  ambient env. CI exports `NODE_ENV=test` at the job level so the same loader
-  finds `.env.test` for both `migration:run` and Jest.
+- **Env-file loading has two lanes**, split by whether the consumer runs inside
+  the Nest DI lifecycle.
+  - **Nest runtime** — `ConfigModule.forRoot({ isGlobal: true, envFilePath:
+['.env.${NODE_ENV ?? 'development'}', '.env'], validate: validateEnv })` in
+    `AppModule` loads the files (dev/test switch, first file wins, no override)
+    and validates them before any provider is built. Because that only happens
+    once Nest evaluates the module, **nothing imported by `AppModule` may read an
+    env var at module-eval/import time** — defer into the DI graph:
+    `TypeOrmModule.forRootAsync({ inject: [ConfigService], useFactory })` builds
+    the data source options, and `WinstonService` builds its logger in the
+    constructor (via `createWinstonLogger(config)`). No eager top-level env read,
+    no `import './config/dotenv'` in `main.ts`.
+  - **Non-Nest entry points** — `ConfigService` cannot serve code outside the DI
+    container, so those keep the standalone `src/config/dotenv.ts` loader via a
+    side-effect import (`import './dotenv';`): `typeorm.config.ts` (loaded
+    directly by the TypeORM CLI for `migration:run`) and Jest's
+    `test/setup-env.ts`. The CLI still gets the same typed, validated reader by
+    building one by hand: `new ConfigService(validateEnv(process.env))`, passed to
+    the same `buildDataSourceOptions(config)` the app uses. The standalone loader
+    reads `.env.${NODE_ENV ?? 'development'}` first, then `.env` as a fallback (no
+    override); `test/setup-env.ts` is a Jest `setupFile` reading
+    `.env.${NODE_ENV ?? 'test'}` with `override: true` so test values win. CI
+    exports `NODE_ENV=test` at the job level so both lanes find `.env.test`.
+
+  Never call `dotenv.config()` anywhere else in `src/`. Keep `@nestjs/config`,
+  `joi` and `dotenv` as dependencies — `ConfigService`+Joi own the DI lane,
+  `dotenv` owns the non-DI lane.
 
 ## 4. Naming
 
@@ -197,14 +212,25 @@ the repo and flag the divergence.
 
 - 100% constructor injection, always `private readonly`. No exceptions —
   including the application logger (see bootstrap rule below).
-- **Env / DI exception.** Some code is evaluated before the Nest DI container
-  (and therefore `ConfigService`) exists: config files loaded by the TypeORM CLI
-  (`typeorm.config.ts`), the Winston logger config (`winston.config.ts`),
-  `main.ts` bootstrap, and scheduler decorators (`@Interval`/`@Cron`) whose
-  arguments are read at class load. In those contexts only, reading the env
-  directly — `process.env` or the `getEnv`/`getEnvNumber` helpers — is the
-  accepted exception to constructor injection. Example:
-  `@Interval(Number(process.env.INTERVAL_MS ?? '10000'))`.
+- **Env / DI exception.** Most code reaches config through `ConfigService` (see
+  §3). Two contexts cannot, because they run outside the DI container:
+  - **Scheduler decorators** (`@Interval`/`@Cron`) whose arguments are evaluated
+    at class load, before any module init. There — and only there — read the env
+    directly via `getEnv`/`getEnvNumber`, e.g.
+    `@Interval(getEnvNumber('INTERVAL_MS', 10000))`. This is the single place the
+    `src/config/env.ts` helpers are used in `src/`.
+  - **The TypeORM CLI** (`typeorm.config.ts`), which is loaded standalone. It
+    does _not_ fall back to raw `getEnv`; it rebuilds the same typed reader by
+    hand — `new ConfigService(validateEnv(process.env))` — and feeds it to the
+    same `buildDataSourceOptions(config)` the app uses.
+
+  `main.ts` is the composition root but is _not_ an exception: it reads the port
+  through `app.get(ConfigService).getOrThrow('APP_PORT', { infer: true })`. Code
+  that runs inside DI must read at injection time, not import time — the data
+  source goes through `TypeOrmModule.forRootAsync`, and `createWinstonLogger(config)`
+  is invoked from the `WinstonService` constructor — never as a module-eval-time
+  constant.
+
 - Version the API via a global prefix from env (`setGlobalPrefix(APP_PREFIX)`)
   ONLY when the API is consumed by a service outside your control (public API,
   third-party client, separately-deployed front-end). For an internal service
@@ -441,11 +467,16 @@ haven't touched — only a full-codebase run catches those regressions.
   still needs a prior `npm run build` because the CLI is invoked with
   `-d ./dist/config/typeorm.config.js`; that constraint is independent of
   the listing format.
-- The module-level `export const dataSource = new DataSource(dataSourceOptions)`
-  in `src/config/typeorm.config.ts` is required by
+- The module-level
+  `export const dataSource = new DataSource(buildDataSourceOptions(config))` in
+  `src/config/typeorm.config.ts` is required by
   `typeorm migration:run -d ./dist/config/typeorm.config.js`. It is the ONLY
   intentional import-time side effect tolerated in `src/config/` beyond the
-  dotenv loader.
+  dotenv loader. The Nest app does **not** import this file; it builds the same
+  options through `TypeOrmModule.forRootAsync` from the shared, side-effect-free
+  `buildDataSourceOptions(config)` in `src/config/database-options.ts`, which
+  takes a `ConfigService<AppConfig, true>` so the app and the CLI share one
+  builder.
 - Repository pattern (`find`, `findOne`, `create`+`save`, `update`, `delete`).
   No custom repository abstraction, no `BaseEntity` active-record style.
 - Calibrate `varchar` lengths to the real data; change a length via a migration

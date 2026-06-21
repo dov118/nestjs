@@ -1,17 +1,29 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSourceOptions } from 'typeorm';
+import { SeederOptions } from 'typeorm-extension';
 
-import { dataSourceOptions } from './config/typeorm.config';
+import { AppConfig, validateEnv } from './config/env-schema';
+import { buildDataSourceOptions } from './config/database-options';
 import { HealthModule } from './modules/health/health.module';
 import { LogTimeService } from './common/scheduler/log-time.service';
 import { WinstonService } from './common/logger/winston.service';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true }),
-    TypeOrmModule.forRoot(dataSourceOptions),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: [`.env.${process.env.NODE_ENV ?? 'development'}`, '.env'],
+      validate: validateEnv,
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (
+        config: ConfigService<AppConfig, true>,
+      ): DataSourceOptions & SeederOptions => buildDataSourceOptions(config),
+    }),
     ScheduleModule.forRoot(),
     HealthModule,
   ],
